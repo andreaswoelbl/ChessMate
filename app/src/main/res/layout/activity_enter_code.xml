@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EnterCodeActivity">
+
+    <TextView
+        android:id="@+id/EnterCodeText"
+        android:layout_width="396dp"
+        android:layout_height="51dp"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:text="Enter game code to join a Session"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/CodeInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="367dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="32dp"
+        android:textColorHint="#000000"
+        app:boxStrokeColor="#000000"
+        app:hintTextColor="#2196F3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/EnterCodeText">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/CodeInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="ENTER GAME CODE HERE"
+            android:inputType="number"
+            android:maxLength="6" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/btn_EnterLobby"
+        android:layout_width="279dp"
+        android:layout_height="67dp"
+        android:layout_marginTop="32dp"
+        android:shadowColor="#FFFFFF"
+        android:text="Enter Lobby"
+        android:textColor="#FFFFFF"
+        android:textColorHighlight="@color/black"
+        android:textColorHint="#FFFFFF"
+        android:textColorLink="@color/black"
+        app:backgroundTint="@color/black"
+        app:cornerRadius="80px"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/CodeInputLayout"
+        app:rippleColor="#FFFFFF"
+        app:strokeColor="#000000" />
+</androidx.constraintlayout.widget.ConstraintLayout>
