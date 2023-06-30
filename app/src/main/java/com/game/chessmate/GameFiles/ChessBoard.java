@@ -36,7 +36,9 @@ public class ChessBoard {
      *
      * @return the chess board
      */
-    public static ChessBoard getInstance(){ return ChessBoard.InstanceHolder.INSTANCE; }
+    public static ChessBoard getInstance() {
+        return ChessBoard.InstanceHolder.INSTANCE;
+    }
 
     /**
      * @view the ViewGroup (BoardView) containing all its children (Fields)
@@ -69,7 +71,7 @@ public class ChessBoard {
      * @param view  the canvas which contains the Chessboard
      * @param width the width
      */
-    public void initChessBoard(BoardView view, int width){
+    public void initChessBoard(BoardView view, int width) {
         this.view = view;
         this.fieldSize = calculateRectSize(width);
         initFields();
@@ -94,7 +96,6 @@ public class ChessBoard {
 
     /**
      * Initializes the pieces for player1. See initPieces for details on the creation.
-     *
      */
     private void initPiecesLocalPlayer(ChessPieceColour color) {
         Bitmap pawn = localPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getPawnWhite() : ResourceLoader.getPawnBlack();
@@ -104,20 +105,19 @@ public class ChessBoard {
         Bitmap queen = localPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getQueenWhite() : ResourceLoader.getQueenBlack();
         Bitmap king = localPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getKingWhite() : ResourceLoader.getKingBlack();
 
-        initPieces(ChessPieceType.PAWN,  6, 0, 8, localPlayer.getChessPiecesAlive(), pawn, color);
-        initPieces(ChessPieceType.ROOK,  7, 0, 1, localPlayer.getChessPiecesAlive(), rook,  color);
-        initPieces(ChessPieceType.ROOK,  7, 7, 1, localPlayer.getChessPiecesAlive(), rook,  color);
-        initPieces(ChessPieceType.KNIGHT,  7, 1, 1, localPlayer.getChessPiecesAlive(), knight, color);
-        initPieces(ChessPieceType.KNIGHT,  7, 6, 1, localPlayer.getChessPiecesAlive(), knight, color);
-        initPieces(ChessPieceType.BISHOP,  7, 2, 1, localPlayer.getChessPiecesAlive(), bishop, color);
-        initPieces(ChessPieceType.BISHOP,  7, 5, 1, localPlayer.getChessPiecesAlive(), bishop, color);
-        initPieces(ChessPieceType.QUEEN,  7, 4, 1, localPlayer.getChessPiecesAlive(), queen, color);
-        initPieces(ChessPieceType.KING,  7, 3, 1, localPlayer.getChessPiecesAlive(), king, color);
+        initPieces(ChessPieceType.PAWN, 6, 0, 8, localPlayer.getChessPiecesAlive(), pawn, color);
+        initPieces(ChessPieceType.ROOK, 7, 0, 1, localPlayer.getChessPiecesAlive(), rook, color);
+        initPieces(ChessPieceType.ROOK, 7, 7, 1, localPlayer.getChessPiecesAlive(), rook, color);
+        initPieces(ChessPieceType.KNIGHT, 7, 1, 1, localPlayer.getChessPiecesAlive(), knight, color);
+        initPieces(ChessPieceType.KNIGHT, 7, 6, 1, localPlayer.getChessPiecesAlive(), knight, color);
+        initPieces(ChessPieceType.BISHOP, 7, 2, 1, localPlayer.getChessPiecesAlive(), bishop, color);
+        initPieces(ChessPieceType.BISHOP, 7, 5, 1, localPlayer.getChessPiecesAlive(), bishop, color);
+        initPieces(ChessPieceType.QUEEN, 7, 4, 1, localPlayer.getChessPiecesAlive(), queen, color);
+        initPieces(ChessPieceType.KING, 7, 3, 1, localPlayer.getChessPiecesAlive(), king, color);
     }
 
     /**
      * Initializes the pieces for player2. See initPieces for details on the creation.
-     *
      */
     private void initPiecesEnemyPlayer(ChessPieceColour color) {
         Bitmap pawn = enemyPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getPawnWhite() : ResourceLoader.getPawnBlack();
@@ -127,15 +127,15 @@ public class ChessBoard {
         Bitmap queen = enemyPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getQueenWhite() : ResourceLoader.getQueenBlack();
         Bitmap king = enemyPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getKingWhite() : ResourceLoader.getKingBlack();
 
-        initPieces(ChessPieceType.PAWN,  1, 0, 8, enemyPlayer.getChessPiecesAlive(), pawn, color);
-        initPieces(ChessPieceType.ROOK,  0, 0, 1, enemyPlayer.getChessPiecesAlive(), rook, color);
-        initPieces(ChessPieceType.ROOK,  0, 7, 1, enemyPlayer.getChessPiecesAlive(), rook, color);
-        initPieces(ChessPieceType.KNIGHT,  0, 1, 1, enemyPlayer.getChessPiecesAlive(), knight, color);
-        initPieces(ChessPieceType.KNIGHT,  0, 6, 1, enemyPlayer.getChessPiecesAlive(), knight, color);
-        initPieces(ChessPieceType.BISHOP,  0, 2, 1, enemyPlayer.getChessPiecesAlive(), bishop, color);
-        initPieces(ChessPieceType.BISHOP,  0, 5, 1, enemyPlayer.getChessPiecesAlive(), bishop, color);
-        initPieces(ChessPieceType.QUEEN,  0, 4, 1, enemyPlayer.getChessPiecesAlive(), queen, color);
-        initPieces(ChessPieceType.KING,  0, 3, 1, enemyPlayer.getChessPiecesAlive(), king, color);
+        initPieces(ChessPieceType.PAWN, 1, 0, 8, enemyPlayer.getChessPiecesAlive(), pawn, color);
+        initPieces(ChessPieceType.ROOK, 0, 0, 1, enemyPlayer.getChessPiecesAlive(), rook, color);
+        initPieces(ChessPieceType.ROOK, 0, 7, 1, enemyPlayer.getChessPiecesAlive(), rook, color);
+        initPieces(ChessPieceType.KNIGHT, 0, 1, 1, enemyPlayer.getChessPiecesAlive(), knight, color);
+        initPieces(ChessPieceType.KNIGHT, 0, 6, 1, enemyPlayer.getChessPiecesAlive(), knight, color);
+        initPieces(ChessPieceType.BISHOP, 0, 2, 1, enemyPlayer.getChessPiecesAlive(), bishop, color);
+        initPieces(ChessPieceType.BISHOP, 0, 5, 1, enemyPlayer.getChessPiecesAlive(), bishop, color);
+        initPieces(ChessPieceType.QUEEN, 0, 4, 1, enemyPlayer.getChessPiecesAlive(), queen, color);
+        initPieces(ChessPieceType.KING, 0, 3, 1, enemyPlayer.getChessPiecesAlive(), king, color);
     }
 
     /**
@@ -149,10 +149,10 @@ public class ChessBoard {
      * @param event the event with the x and y coordinates of the touch event.
      */
 
-    private  Field startPossition;
-    private  Field endPossition;
-    private  ChessPiece movedPiece;
-    private  boolean moveWasLegal = false;
+    private Field startPosition;
+    private Field endPosition;
+    private ChessPiece movedPiece;
+    private boolean moveWasLegal = false;
 
     /**
      * Handles onTouchEvent fired by the BoardView (onTouchEvent) when the View is clicked on.
@@ -160,13 +160,13 @@ public class ChessBoard {
      * the coordinates from one of the Fields (Rectangles); it then translates the coordinates from the 2D Array
      * to chessboard coordinates and logs them.
      * Uses Rectangle that was clicked on to determine field and with that chess piece that was clicked on. Then calls Method
-     * to determine legalMoves of ChessPiece and calls method to draw legalMoves.
+     * to determine legalMoves of ChessPiece and calls method to draw legalMoves. Later moves ChessPieces accordingly as well.
      *
      * @param event the event with the x and y coordinates of the touch event.
      */
     public void handleFieldClick(MotionEvent event) {
-        int touchX = (int)event.getX();
-        int touchY = (int)event.getY();
+        int touchX = (int) event.getX();
+        int touchY = (int) event.getY();
         Rect rect;
 
         for (int i = 0; i < boardFields.length; i++) {
@@ -176,71 +176,59 @@ public class ChessBoard {
                 if (rect.contains(touchX, touchY)) {
                     Field clickedField = boardFields[i][j];
 
-                    if(clickedField.getCurrentPiece() != null){
-                        if(clickedField.getCurrentPiece().getColour() == localPlayer.getColor()){
+                    if (clickedField.getCurrentPiece() != null) {
+                        if (clickedField.getCurrentPiece().getColour() == localPlayer.getColor()) {
                             localPlayer.setLastSelectedField(null);
                             resetLegalMoves();
                         }
                     }
-                    if(localPlayer.getLastSelectedField() == null){ //this is the first click on a field
+                    if (localPlayer.getLastSelectedField() == null) { //this is the first click on a field
                         if (clickedField.getCurrentPiece() != null) {
-                            localPlayer.setLastSelectedField(clickedField);
-                            // position for CheatFunction
-                            // Log.d("position1", lastSelectedField.toString());
-                            startPossition = clickedField;
-                            movedPiece = startPossition.getCurrentPiece();
-                            localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalFields());
-                            if(!localPlayer.getLegalMovesSelected().isEmpty()){
-                                drawLegalMoves(localPlayer.getLegalMovesSelected());
-                            }
+                            if (clickedField.getCurrentPiece().getColour() == localPlayer.getColor()) { //only local player is allowed to move
+                                localPlayer.setLastSelectedField(clickedField);
+                                // position for CheatFunction
+                                // Log.d("position1", lastSelectedField.toString());
+                                startPosition = clickedField;
+                                movedPiece = startPosition.getCurrentPiece();
+                                if (GameActivity.cheatButtonStatus()) {
+                                    localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getCheatFunctionMoves());
+                                } else {
+                                    localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalFields());
+                                }
+                                if (!localPlayer.getLegalMovesSelected().isEmpty()) {
+                                    drawLegalMoves(localPlayer.getLegalMovesSelected());
+                                }
 
-                            if (GameActivity.cheatButtonStatus()) {
-                                localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getCheatFunctionMoves());
-                            } else {
-                                localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalFields());
-                            }
-                            if (!localPlayer.getLegalMovesSelected().isEmpty()) {
-                                drawLegalMoves(localPlayer.getLegalMovesSelected());
-                            }
-                        }
-                    }else{//this is the second click
-                        if(localPlayer.getLegalMovesSelected().contains(clickedField)){
-
-                            // postition for CheatFunction
-                            endPossition = clickedField;
-                            // Log.d("position2", clickedField.toString());
-
-                            /*
-                            if(clickedField.getCurrentPiece() != null){
-                                if(clickedField.getCurrentPiece().getColour() != player1.getColor()){
-                                    clickedField.getCurrentPiece().capture();
-                                    Log.d("debug", "CAPTURE");
+                                if (!localPlayer.getLegalMovesSelected().isEmpty()) {
+                                    drawLegalMoves(localPlayer.getLegalMovesSelected());
                                 }
                             }
+                        }
+                    } else {//this is the second click
+                        if (localPlayer.getLegalMovesSelected().contains(clickedField)) {
 
-                             */
+                            endPosition = clickedField;
+
                             localPlayer.getLastSelectedField().getCurrentPiece().move(clickedField);
                             localPlayer.getLastSelectedField().getCurrentPiece().setFirstMove(false); //so that pawn has limited legal moves next time
                             localPlayer.setLastSelectedField(null);
                             resetLegalMoves();
 
                             if (GameActivity.cheatButtonStatus()) {
-                                //TODO  Pawn first move of 2 Fields is still false
                                 localPlayer.setLegalMovesForCheat(movedPiece.getLegalFields());
-                                if ((localPlayer.getLegalMovesForCheat().contains(endPossition))) {
+                                if ((localPlayer.getLegalMovesForCheat().contains(endPosition))) {
                                     moveWasLegal = true;
                                     Log.d("Move********TRUE", String.valueOf(moveWasLegal));
-                                } else {moveWasLegal = false;
+                                } else {
+                                    moveWasLegal = false;
                                     Log.d("Move_______FALSE", String.valueOf(moveWasLegal));
                                 }
                             }
 
-
-                        }else{
+                        } else {
                             localPlayer.setLastSelectedField(null);
                         }
                     }
-
                 }
             }
         }
@@ -252,7 +240,7 @@ public class ChessBoard {
      *
      * @return the boolean
      */
-    public  boolean getwasMoveLegal(){
+    public boolean getwasMoveLegal() {
         return moveWasLegal;
     }
 
@@ -261,8 +249,8 @@ public class ChessBoard {
      *
      * @return the start possition
      */
-    public  Field getStartPossition() {
-        return startPossition;
+    public Field getStartPossition() {
+        return startPosition;
     }
 
     /**
@@ -270,12 +258,12 @@ public class ChessBoard {
      *
      * @return the end possition
      */
-    public  Field getEndPossition() {
-        return endPossition;
+    public Field getEndPossition() {
+        return endPosition;
     }
 
     private void resetLegalMoves() {
-        for(Field f : localPlayer.getLegalMovesSelected()) {
+        for (Field f : localPlayer.getLegalMovesSelected()) {
             f.setRectangleDefaultColor();
             f.setAsIllegal();
             f.setUpdate(true);
@@ -285,13 +273,14 @@ public class ChessBoard {
     /**
      * Sets all fields in ArrayList fieldsToMove as legal to move to. Then calls redraw of view to mark the fields as legal.
      * When a new fieldsToMove Array is passed, the old Fields will be reset to their original color.
+     *
      * @param fieldsToMove ArrayList of Fields that are legal for the currently selected ChessPiece to move to
      */
     private void drawLegalMoves(ArrayList<Field> fieldsToMove) {
         resetLegalMoves();
 
-        if(!fieldsToMove.isEmpty()){
-            for(Field f : fieldsToMove){
+        if (!fieldsToMove.isEmpty()) {
+            for (Field f : fieldsToMove) {
                 f.setAsLegal();
                 f.invalidate();
             }
@@ -309,37 +298,49 @@ public class ChessBoard {
     public int calculateRectSize(int width) {
         float canvasWidth = width;
         float offset = canvasWidth % 8;
-        int rectSize = (int)canvasWidth / this.boardSize - (int)offset;
+        int rectSize = (int) canvasWidth / this.boardSize - (int) offset;
         return rectSize;
     }
 
     /**
-     *
-     * @param type the type of ChessPiece to init. ex. ChessPieceType.Pawn.
-     * @sprite the bitmap of this ChessPiece.
-     * @param row the row in which the ChessPieces should be placed.
-     * @param offset the startPoint in the 2D Array boardFields at which the placement of the ChessPieces should begin.
-     *               the row param is the the row, the offset param is the column.
-     * @param length specifies the amount of ChessPieces of the param @type that should be placed next to each other. (ex. pawns 1-8).
+     * @param type         the type of ChessPiece to init. ex. ChessPieceType.Pawn.
+     * @param row          the row in which the ChessPieces should be placed.
+     * @param offset       the startPoint in the 2D Array boardFields at which the placement of the ChessPieces should begin.
+     *                     the row param is the the row, the offset param is the column.
+     * @param length       specifies the amount of ChessPieces of the param @type that should be placed next to each other. (ex. pawns 1-8).
      * @param piecesPlayer the array that contains the players pieces.
+     * @sprite the bitmap of this ChessPiece.
      */
     private void initPieces(ChessPieceType type, int row, int offset, int length, ArrayList<ChessPiece> piecesPlayer, Bitmap sprite, ChessPieceColour colour) {
         for (int j = offset; j < offset + length; j++) {
             Field field = boardFields[row][j];
             ChessPiece piece = null;
 
-            switch(type) {
-                case PAWN: piece = new Pawn(field, sprite, view.getContext(), null, colour); break;
-                case ROOK: piece = new Rook(field, sprite, view.getContext(), null, colour); break;
-                case BISHOP: piece = new Bishop(field, sprite, view.getContext(), null, colour); break;
-                case KNIGHT: piece = new Knight(field, sprite, view.getContext(), null, colour); break;
-                case QUEEN: piece = new Queen(field, sprite, view.getContext(), null, colour); break;
-                case KING: piece = new King(field, sprite, view.getContext(), null, colour); break;
-                default: throw new UnsupportedOperationException();
+            switch (type) {
+                case PAWN:
+                    piece = new Pawn(field, sprite, view.getContext(), null, colour);
+                    break;
+                case ROOK:
+                    piece = new Rook(field, sprite, view.getContext(), null, colour);
+                    break;
+                case BISHOP:
+                    piece = new Bishop(field, sprite, view.getContext(), null, colour);
+                    break;
+                case KNIGHT:
+                    piece = new Knight(field, sprite, view.getContext(), null, colour);
+                    break;
+                case QUEEN:
+                    piece = new Queen(field, sprite, view.getContext(), null, colour);
+                    break;
+                case KING:
+                    piece = new King(field, sprite, view.getContext(), null, colour);
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
             }
             piecesPlayer.add(piece);
             field.setCurrentPiece(piece);
-            view.addView((View)piece);
+            view.addView((View) piece);
         }
     }
 

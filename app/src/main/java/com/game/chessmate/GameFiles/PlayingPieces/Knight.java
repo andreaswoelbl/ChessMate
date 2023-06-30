@@ -27,6 +27,11 @@ public class Knight extends ChessPiece {
         return ChessPieceType.KNIGHT;
     }
 
+
+    /**
+     * Method determines all legal fields, that type of chess piece is allowed to move to and returns them as an ArrayList.
+     * @return ArrayList of fields that are legal for the chess Piece to move to.
+     */
     public ArrayList<Field> getLegalFields() {
         Field[][] currentFields = ChessBoard.getInstance().getBoardFields();
         ArrayList<Field> legalFields = new ArrayList<>();
@@ -41,44 +46,44 @@ public class Knight extends ChessPiece {
                     legalFields.add(currentFields[i][j]);
                 }
             }
-                i = currentPosition.getFieldX();
-                j = currentPosition.getFieldY();
-                switch(loops){
-                    case 0:
-                        i-=2;
-                        j++;
-                        break;
-                    case 1:
-                        i-=2;
-                        j--;
-                        break;
-                    case 2:
-                        i+=2;
-                        j--;
-                        break;
-                    case 3:
-                        i+=2;
-                        j++;
-                        break;
-                    case 4:
-                        i--;
-                        j+=2;
-                        break;
-                    case 5:
-                        i++;
-                        j+=2;
-                        break;
-                    case 6:
-                        i--;
-                        j-=2;
-                        break;
-                    case 7:
-                        i++;
-                        j-=2;
-                        break;
+            i = currentPosition.getFieldX();
+            j = currentPosition.getFieldY();
+            switch(loops){
+                case 0:
+                    i-=2;
+                    j++;
+                    break;
+                case 1:
+                    i-=2;
+                    j--;
+                    break;
+                case 2:
+                    i+=2;
+                    j--;
+                    break;
+                case 3:
+                    i+=2;
+                    j++;
+                    break;
+                case 4:
+                    i--;
+                    j+=2;
+                    break;
+                case 5:
+                    i++;
+                    j+=2;
+                    break;
+                case 6:
+                    i--;
+                    j-=2;
+                    break;
+                case 7:
+                    i++;
+                    j-=2;
+                    break;
 
-                }
             }
+        }
 
         return legalFields;
     }
