@@ -3,6 +3,7 @@ package com.game.chessmate.GameFiles.PlayingPieces;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -37,11 +38,11 @@ public class Pawn extends ChessPiece {
         int i = currentPosition.getFieldX();
         int j = currentPosition.getFieldY();
 
+        //moving to empty fields is allowed
         if(i-1 >= 0) {
             if (currentFields[i - 1][j].getCurrentPiece() == null) {
                 legalFields.add(currentFields[i - 1][j]);
             } else if (currentFields[i - 1][j].getCurrentPiece().getColour() != this.colour) {
-                legalFields.add(currentFields[i - 1][j]);
                 opponentEncountered = true;
             } else {
                 return legalFields;
@@ -53,6 +54,22 @@ public class Pawn extends ChessPiece {
                     legalFields.add(currentFields[i - 2][j]);
                 } else {
                     return legalFields;
+                }
+            }
+        }
+
+        //attacking fields is allowed diagonally
+        if(i-1>=0 && j-1>=0){
+            if (currentFields[i-1][j-1].getCurrentPiece() != null) {
+                if(currentFields[i-1][j-1].getCurrentPiece().getColour() != this.colour){
+                    legalFields.add(currentFields[i-1][j-1]);
+                }
+            }
+        }
+        if(i-1>=0 && j+1<8){
+            if (currentFields[i-1][j+1].getCurrentPiece() != null) {
+                if(currentFields[i-1][j+1].getCurrentPiece().getColour() != this.colour){
+                    legalFields.add(currentFields[i-1][j+1]);
                 }
             }
         }

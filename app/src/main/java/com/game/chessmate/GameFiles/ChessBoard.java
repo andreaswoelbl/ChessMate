@@ -169,6 +169,7 @@ public class ChessBoard {
         int touchY = (int) event.getY();
         Rect rect;
 
+        resetLegalMoves();
         for (int i = 0; i < boardFields.length; i++) {
             for (int j = 0; j < boardFields[i].length; j++) {
                 rect = boardFields[i][j].getRectangle();
