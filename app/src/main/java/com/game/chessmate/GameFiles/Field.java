@@ -56,9 +56,9 @@ public class Field extends View {
     protected void onDraw(Canvas canvas) {
         canvas.drawRect(rectangle, color);
         if(legal){
-            Log.d("debug", "draw circle");
             int fieldSize = ChessBoard.getInstance().getFieldSize();
-            canvas.drawCircle(fieldSize*this.y+fieldSize/2,fieldSize*this.x+fieldSize/2, fieldSize/4, colorLegal);
+            canvas.drawCircle(fieldSize*this.y+fieldSize/2,fieldSize*this.x+fieldSize/2, (float)(fieldSize/2.7), colorLegal);
+            Log.d("debug", "I drew a circle");
         }
     }
 
