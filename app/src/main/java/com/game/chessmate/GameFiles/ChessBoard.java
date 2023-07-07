@@ -55,6 +55,8 @@ public class ChessBoard {
     private final int boardSize = 8;
     private Player localPlayer;
     private Player enemyPlayer;
+
+    private ChessPiece localKing;
     private boolean isInverted;
 
     private ChessBoard() {
@@ -195,6 +197,8 @@ public class ChessBoard {
                                     localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getCheatFunctionMoves());
                                 } else {
                                     localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalFields());
+                                    localKing = getLocalKing();
+                                    //TODO
                                 }
                                 if (!localPlayer.getLegalMovesSelected().isEmpty()) {
                                     drawLegalMoves(localPlayer.getLegalMovesSelected());
@@ -235,6 +239,20 @@ public class ChessBoard {
         }
     }
 
+
+    //searches for local king and returns - could also be used for game over
+    private ChessPiece getLocalKing() {
+        for (int i = 0; i < boardFields.length; i++) {
+            for (int j = 0; j < boardFields[i].length; j++) {
+                if (boardFields[i][j].getCurrentPiece() != null) {
+                    if (boardFields[i][j].getCurrentPiece().getPlayingPieceType() == ChessPieceType.KING && boardFields[i][j].getCurrentPiece().getColour() == localPlayer.getColor()) {
+                        return boardFields[i][j].getCurrentPiece();
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     /**
      * Getwas move legal boolean.
