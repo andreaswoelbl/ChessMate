@@ -1,12 +1,16 @@
 package com.game.chessmate.GameFiles;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 import com.game.chessmate.GameActivity;
+import com.game.chessmate.GameFiles.Networking.NetworkManager;
 import com.game.chessmate.GameFiles.PlayingPieces.Bishop;
 import com.game.chessmate.GameFiles.PlayingPieces.ChessPiece;
 import com.game.chessmate.GameFiles.PlayingPieces.ChessPieceColour;
@@ -16,8 +20,11 @@ import com.game.chessmate.GameFiles.PlayingPieces.Knight;
 import com.game.chessmate.GameFiles.PlayingPieces.Pawn;
 import com.game.chessmate.GameFiles.PlayingPieces.Queen;
 import com.game.chessmate.GameFiles.PlayingPieces.Rook;
+import com.game.chessmate.R;
 
 import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * The ChessBoard class handles creation and maintenance of the ChessBoard
@@ -55,15 +62,12 @@ public class ChessBoard {
     private final int boardSize = 8;
     private Player localPlayer;
     private Player enemyPlayer;
+    private GameState gameState;
 
     private ChessPiece localKing;
-    private boolean isInverted;
 
     private ChessBoard() {
         this.boardFields = new Field[8][8];
-        localPlayer = new Player(ChessPieceColour.WHITE);
-        enemyPlayer = new Player(ChessPieceColour.BLACK);
-        isInverted = localPlayer.getColor() == ChessPieceColour.WHITE ? false : true;
     }
 
     /**
@@ -77,6 +81,12 @@ public class ChessBoard {
         this.view = view;
         this.fieldSize = calculateRectSize(width);
         initFields();
+        localPlayer = new Player(NetworkManager.getInitialColor());
+        if(NetworkManager.getInitialColor()==ChessPieceColour.WHITE){
+            enemyPlayer = new Player(ChessPieceColour.BLACK);
+        } else {
+            enemyPlayer = new Player(ChessPieceColour.WHITE);
+        }
         initPiecesLocalPlayer(localPlayer.getColor());
         initPiecesEnemyPlayer(enemyPlayer.getColor());
     }
@@ -107,15 +117,22 @@ public class ChessBoard {
         Bitmap queen = localPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getQueenWhite() : ResourceLoader.getQueenBlack();
         Bitmap king = localPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getKingWhite() : ResourceLoader.getKingBlack();
 
-        initPieces(ChessPieceType.PAWN, 6, 0, 8, localPlayer.getChessPiecesAlive(), pawn, color);
-        initPieces(ChessPieceType.ROOK, 7, 0, 1, localPlayer.getChessPiecesAlive(), rook, color);
-        initPieces(ChessPieceType.ROOK, 7, 7, 1, localPlayer.getChessPiecesAlive(), rook, color);
-        initPieces(ChessPieceType.KNIGHT, 7, 1, 1, localPlayer.getChessPiecesAlive(), knight, color);
-        initPieces(ChessPieceType.KNIGHT, 7, 6, 1, localPlayer.getChessPiecesAlive(), knight, color);
-        initPieces(ChessPieceType.BISHOP, 7, 2, 1, localPlayer.getChessPiecesAlive(), bishop, color);
-        initPieces(ChessPieceType.BISHOP, 7, 5, 1, localPlayer.getChessPiecesAlive(), bishop, color);
-        initPieces(ChessPieceType.QUEEN, 7, 4, 1, localPlayer.getChessPiecesAlive(), queen, color);
-        initPieces(ChessPieceType.KING, 7, 3, 1, localPlayer.getChessPiecesAlive(), king, color);
+        initPieces(ChessPieceType.PAWN,  6, 0, 8, localPlayer.getChessPiecesAlive(), pawn, color);
+        initPieces(ChessPieceType.ROOK,  7, 0, 1, localPlayer.getChessPiecesAlive(), rook,  color);
+        initPieces(ChessPieceType.ROOK,  7, 7, 1, localPlayer.getChessPiecesAlive(), rook,  color);
+        initPieces(ChessPieceType.KNIGHT,  7, 1, 1, localPlayer.getChessPiecesAlive(), knight, color);
+        initPieces(ChessPieceType.KNIGHT,  7, 6, 1, localPlayer.getChessPiecesAlive(), knight, color);
+        initPieces(ChessPieceType.BISHOP,  7, 2, 1, localPlayer.getChessPiecesAlive(), bishop, color);
+        initPieces(ChessPieceType.BISHOP,  7, 5, 1, localPlayer.getChessPiecesAlive(), bishop, color);
+        if (color == ChessPieceColour.WHITE) {
+            initPieces(ChessPieceType.QUEEN,  7, 3, 1, localPlayer.getChessPiecesAlive(), queen, color);
+            initPieces(ChessPieceType.KING,  7, 4, 1, localPlayer.getChessPiecesAlive(), king, color);
+        }
+        else {
+            initPieces(ChessPieceType.QUEEN,  7, 4, 1, localPlayer.getChessPiecesAlive(), queen, color);
+            initPieces(ChessPieceType.KING,  7, 3, 1, localPlayer.getChessPiecesAlive(), king, color);
+        }
+
     }
 
     /**
@@ -129,15 +146,22 @@ public class ChessBoard {
         Bitmap queen = enemyPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getQueenWhite() : ResourceLoader.getQueenBlack();
         Bitmap king = enemyPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getKingWhite() : ResourceLoader.getKingBlack();
 
-        initPieces(ChessPieceType.PAWN, 1, 0, 8, enemyPlayer.getChessPiecesAlive(), pawn, color);
-        initPieces(ChessPieceType.ROOK, 0, 0, 1, enemyPlayer.getChessPiecesAlive(), rook, color);
-        initPieces(ChessPieceType.ROOK, 0, 7, 1, enemyPlayer.getChessPiecesAlive(), rook, color);
-        initPieces(ChessPieceType.KNIGHT, 0, 1, 1, enemyPlayer.getChessPiecesAlive(), knight, color);
-        initPieces(ChessPieceType.KNIGHT, 0, 6, 1, enemyPlayer.getChessPiecesAlive(), knight, color);
-        initPieces(ChessPieceType.BISHOP, 0, 2, 1, enemyPlayer.getChessPiecesAlive(), bishop, color);
-        initPieces(ChessPieceType.BISHOP, 0, 5, 1, enemyPlayer.getChessPiecesAlive(), bishop, color);
-        initPieces(ChessPieceType.QUEEN, 0, 4, 1, enemyPlayer.getChessPiecesAlive(), queen, color);
-        initPieces(ChessPieceType.KING, 0, 3, 1, enemyPlayer.getChessPiecesAlive(), king, color);
+        initPieces(ChessPieceType.PAWN,  1, 0, 8, enemyPlayer.getChessPiecesAlive(), pawn, color);
+        initPieces(ChessPieceType.ROOK,  0, 0, 1, enemyPlayer.getChessPiecesAlive(), rook, color);
+        initPieces(ChessPieceType.ROOK,  0, 7, 1, enemyPlayer.getChessPiecesAlive(), rook, color);
+        initPieces(ChessPieceType.KNIGHT,  0, 1, 1, enemyPlayer.getChessPiecesAlive(), knight, color);
+        initPieces(ChessPieceType.KNIGHT,  0, 6, 1, enemyPlayer.getChessPiecesAlive(), knight, color);
+        initPieces(ChessPieceType.BISHOP,  0, 2, 1, enemyPlayer.getChessPiecesAlive(), bishop, color);
+        initPieces(ChessPieceType.BISHOP,  0, 5, 1, enemyPlayer.getChessPiecesAlive(), bishop, color);
+        if (color == ChessPieceColour.WHITE) {
+            initPieces(ChessPieceType.QUEEN,  0, 4, 1, enemyPlayer.getChessPiecesAlive(), queen, color);
+            initPieces(ChessPieceType.KING,  0, 3, 1, enemyPlayer.getChessPiecesAlive(), king, color);
+        }
+        else {
+            initPieces(ChessPieceType.QUEEN,  0, 3, 1, enemyPlayer.getChessPiecesAlive(), queen, color);
+            initPieces(ChessPieceType.KING,  0, 4, 1, enemyPlayer.getChessPiecesAlive(), king, color);
+        }
+
     }
 
     /**
@@ -167,8 +191,12 @@ public class ChessBoard {
      * @param event the event with the x and y coordinates of the touch event.
      */
     public void handleFieldClick(MotionEvent event) {
-        int touchX = (int) event.getX();
-        int touchY = (int) event.getY();
+        Log.i(TAG, "handleFieldClick: " + gameState);
+        if (gameState == GameState.WAITING) {
+            return;
+        }
+        int touchX = (int)event.getX();
+        int touchY = (int)event.getY();
         Rect rect;
 
         resetLegalMoves();
@@ -185,7 +213,8 @@ public class ChessBoard {
                             resetLegalMoves();
                         }
                     }
-                    if (localPlayer.getLastSelectedField() == null) { //this is the first click on a field
+
+                    if (localPlayer.getLastSelectedField() == null) { //this is the first click on a field with a piece that is movable
                         if (clickedField.getCurrentPiece() != null) {
                             if (clickedField.getCurrentPiece().getColour() == localPlayer.getColor()) { //only local player is allowed to move
                                 localPlayer.setLastSelectedField(clickedField);
@@ -197,11 +226,13 @@ public class ChessBoard {
                                     localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getCheatFunctionMoves());
                                 } else {
                                     localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalFields());
-                                    localKing = getLocalKing();
-                                    //TODO
                                 }
-                                if (!localPlayer.getLegalMovesSelected().isEmpty()) {
-                                    drawLegalMoves(localPlayer.getLegalMovesSelected());
+
+                                //overwrite normal legal moves if king is in check - TODO checkmate
+                                localKing = getLocalKing();
+                                if(localKing.isChecked(boardFields)){
+                                    //TODO check which pieces are threatening and colour their fields
+                                    localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalMovesInCheck());
                                 }
 
                                 if (!localPlayer.getLegalMovesSelected().isEmpty()) {
@@ -214,6 +245,7 @@ public class ChessBoard {
 
                             endPosition = clickedField;
 
+                            //TODO - only move if moving does not cause king to be in check - change legalfields again to restrict if it causes check
                             localPlayer.getLastSelectedField().getCurrentPiece().move(clickedField);
                             localPlayer.getLastSelectedField().getCurrentPiece().setFirstMove(false); //so that pawn has limited legal moves next time
                             localPlayer.setLastSelectedField(null);
@@ -238,10 +270,8 @@ public class ChessBoard {
             }
         }
     }
-
-
     //searches for local king and returns - could also be used for game over
-    private ChessPiece getLocalKing() {
+    public ChessPiece getLocalKing() {
         for (int i = 0; i < boardFields.length; i++) {
             for (int j = 0; j < boardFields[i].length; j++) {
                 if (boardFields[i][j].getCurrentPiece() != null) {
@@ -336,26 +366,13 @@ public class ChessBoard {
             ChessPiece piece = null;
 
             switch (type) {
-                case PAWN:
-                    piece = new Pawn(field, sprite, view.getContext(), null, colour);
-                    break;
-                case ROOK:
-                    piece = new Rook(field, sprite, view.getContext(), null, colour);
-                    break;
-                case BISHOP:
-                    piece = new Bishop(field, sprite, view.getContext(), null, colour);
-                    break;
-                case KNIGHT:
-                    piece = new Knight(field, sprite, view.getContext(), null, colour);
-                    break;
-                case QUEEN:
-                    piece = new Queen(field, sprite, view.getContext(), null, colour);
-                    break;
-                case KING:
-                    piece = new King(field, sprite, view.getContext(), null, colour);
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
+                case PAWN: piece = new Pawn(field, sprite, view.getContext(), null, colour); break;
+                case ROOK: piece = new Rook(field, sprite, view.getContext(), null, colour); break;
+                case BISHOP: piece = new Bishop(field, sprite, view.getContext(), null, colour); break;
+                case KNIGHT: piece = new Knight(field, sprite, view.getContext(), null, colour); break;
+                case QUEEN: piece = new Queen(field, sprite, view.getContext(), null, colour); break;
+                case KING: piece = new King(field, sprite, view.getContext(), null, colour); break;
+                default: throw new UnsupportedOperationException();
             }
             piecesPlayer.add(piece);
             field.setCurrentPiece(piece);
@@ -415,5 +432,17 @@ public class ChessBoard {
      */
     public Player getEnemyPlayer() {
         return enemyPlayer;
+    }
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(GameState gameState) {
+        if(view != null){
+            GameActivity a = (GameActivity) view.getContext();
+            a.setGameStateView(gameState);
+        }
+        this.gameState = gameState;
     }
 }

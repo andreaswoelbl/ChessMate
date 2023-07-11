@@ -17,8 +17,6 @@ import java.util.ArrayList;
  */
 public class King extends ChessPiece {
 
-    private ArrayList<ChessPiece> checkKing = new ArrayList<>();
-    private ArrayList<Field> legalMovesInCheck = new ArrayList<>();
     private boolean gameOver = false;
 
     /**
@@ -62,6 +60,7 @@ public class King extends ChessPiece {
         return legalFields;
     }
 
+    //checks whether king / this piece would still be in check
     public boolean isChecked(Field[][] fields) {
         boolean result = false;
         for (int i = 0; i < fields.length; i++) {
@@ -70,7 +69,6 @@ public class King extends ChessPiece {
                     if (fields[i][j].getCurrentPiece().getColour() != this.getColour()) {
                         for (Field f : fields[i][j].getCurrentPiece().getLegalFields()) {
                             if (f.equals(currentPosition)) {
-                                checkKing.add(f.getCurrentPiece());
                                 result = true;
                             }
                         }
@@ -81,48 +79,13 @@ public class King extends ChessPiece {
         return result;
     }
 
-    public ArrayList<Field> getLegalMovesInCheck() {
-        ArrayList<Field> legalFields = this.getLegalFields();
-        Field[][] currentFields = ChessBoard.getInstance().getBoardFields();
-        legalMovesInCheck = new ArrayList<Field>();
 
-        for (Field f : legalFields) {
-            if (!wouldbeChecked(currentFields, f)) {
-                legalMovesInCheck.add(f);
-            }
-        }
-        return legalMovesInCheck;
-    }
-
-    /*public boolean isInCheckMate(Field[][] fields) { //????
-        for (int i = 0; i < fields.length; i++) {
-            for (int j = 0; j < fields.length; j++) {
-                if (fields[i][j].getCurrentPiece() != null) {
-                    if (fields[i][j].getCurrentPiece().getColour() != this.getColour()) {
-                        for (Field f : fields[i][j].getCurrentPiece().getLegalFields()) {
-                            for (ChessPiece p : checkKing) {
-                                if (f.equals(p.getPosition())) {
-                                    if (!isChecked(fields)) {
-                                        p.capture();
-                                        p = null;//does not work that way
-                                        return false;
-                                    }
-                                    //p=temp;//does not work that way anymore
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }*/
-
-    
-
-    //checks whether king would still be in check if he moved to this field - if yes this field can not be moved to !!
-    private boolean wouldbeChecked(Field [][] currentFields, Field f) {
+    //checks whether king / this piece would still be in check if he moved to this field - if yes this field can not be moved to !!
+    @Override
+    public boolean wouldbeChecked(Field [][] currentFields, Field f) {
         Field realPosition = currentPosition;
         currentPosition = f; //what would happen if king had this field as position
-        boolean result = isChecked(currentFields);
+        boolean result = isChecked(currentFields); //would this piece / king still be in check?
         currentPosition = realPosition; //resetting to real position
         return result;
     }
