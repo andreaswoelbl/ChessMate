@@ -195,25 +195,21 @@ abstract public class ChessPiece extends View {
      */
     private void afterMove() {
         Log.i("GAMESTATE","afterMovestart: " + ChessBoard.getInstance().getGameState());
-        /*
-        if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE){
+        if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
             NetworkManager.sendMove(currentPosition, targetPosition);
 
-        if (ChessBoard.getInstance().isCardActivated()){
-            Log.i("GAMESTATE", "afterCardstart: " + ChessBoard.getInstance().getGameState());
-            if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
-                NetworkManager.sendCard(ChessBoard.getInstance().getDeck().getLastCardPlayed().getId(),currentPosition, targetPosition);
+            if (ChessBoard.getInstance().isCardActivated()) {
+                Log.i("GAMESTATE", "afterCardstart: " + ChessBoard.getInstance().getGameState());
+                if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
+                    NetworkManager.sendCard(ChessBoard.getInstance().getDeck().getLastCardPlayed().getId(), currentPosition, targetPosition);
+                }
+            } else {
+                Log.i("GAMESTATE", "afterMovestart: " + ChessBoard.getInstance().getGameState());
+                if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
+                    NetworkManager.sendMove(currentPosition, targetPosition);
+                }
             }
         }
-
-        else {
-            Log.i("GAMESTATE", "afterMovestart: " + ChessBoard.getInstance().getGameState());
-            if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
-                NetworkManager.sendMove(currentPosition, targetPosition);
-            }
-        }
-
-         */
         this.updateMovementOffset = false;
         this.offset = new Vector(0,0);
         currentPosition.setCurrentPiece(null);
@@ -230,8 +226,6 @@ abstract public class ChessPiece extends View {
         }
 
         this.setUpdateView(true);
-        /*
-
 
         if (ChessBoard.getInstance().getGameState() == GameState.WAITING) {
             ChessBoard.getInstance().setGameState(GameState.ACTIVE);
@@ -250,8 +244,6 @@ abstract public class ChessPiece extends View {
         else {
             Log.i("GAMESTATE", "afterMoveend: " + ChessBoard.getInstance().getGameState());
         }
-
-         */
     }
 
     /**
