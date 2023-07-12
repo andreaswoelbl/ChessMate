@@ -41,17 +41,25 @@ public class Pawn extends ChessPiece {
         //moving to empty fields is allowed
         if(i-1 >= 0) {
             if (currentFields[i - 1][j].getCurrentPiece() == null) {
-                legalFields.add(currentFields[i - 1][j]);
+                if(!currentFields[i-1][j].isBlocked())
+                    if(!wouldbeChecked(currentFields, currentFields[i-1][j])){//piece can only move to legal field if it does not cause the king to be in check
+                        legalFields.add(currentFields[i-1][j]);
+                    }
             } else if (currentFields[i - 1][j].getCurrentPiece().getColour() != this.colour) {
                 opponentEncountered = true;
             } else {
                 return legalFields;
             }
-            if (this.getFirstMove() && i - 2 < 8 && !opponentEncountered) {
+            if (this.getFirstMove() && i - 2 > 0 && !opponentEncountered) {
                 if (currentFields[i - 2][j].getCurrentPiece() == null) {
-                    legalFields.add(currentFields[i - 2][j]);
+                    if(!currentFields[i-2][j].isBlocked())
+                        if(!wouldbeChecked(currentFields, currentFields[i-2][j])){//piece can only move to legal field if it does not cause the king to be in check
+                            legalFields.add(currentFields[i-2][j]);
+                        }
                 } else if (currentFields[i - 2][j].getCurrentPiece().getColour() != this.colour) {
-                    legalFields.add(currentFields[i - 2][j]);
+                    if(!wouldbeChecked(currentFields, currentFields[i-2][j])){//piece can only move to legal field if it does not cause the king to be in check
+                        legalFields.add(currentFields[i-2][j]);
+                    }
                 } else {
                     return legalFields;
                 }
@@ -61,15 +69,19 @@ public class Pawn extends ChessPiece {
         //attacking fields is allowed diagonally
         if(i-1>=0 && j-1>=0){
             if (currentFields[i-1][j-1].getCurrentPiece() != null) {
-                if(currentFields[i-1][j-1].getCurrentPiece().getColour() != this.colour){
-                    legalFields.add(currentFields[i-1][j-1]);
+                if(currentFields[i-1][j-1].getCurrentPiece().getColour() != this.colour&&!currentFields[i-1][j-1].isProtected()){
+                    if(!wouldbeChecked(currentFields, currentFields[i-1][j-1])){//piece can only move to legal field if it does not cause the king to be in check
+                        legalFields.add(currentFields[i-1][j-1]);
+                    }
                 }
             }
         }
         if(i-1>=0 && j+1<8){
             if (currentFields[i-1][j+1].getCurrentPiece() != null) {
-                if(currentFields[i-1][j+1].getCurrentPiece().getColour() != this.colour){
-                    legalFields.add(currentFields[i-1][j+1]);
+                if(currentFields[i-1][j+1].getCurrentPiece().getColour() != this.colour&&!currentFields[i-1][j+1].isProtected()){
+                    if(!wouldbeChecked(currentFields, currentFields[i-1][j+1])){//piece can only move to legal field if it does not cause the king to be in check
+                        legalFields.add(currentFields[i-1][j+1]);
+                    }
                 }
             }
         }

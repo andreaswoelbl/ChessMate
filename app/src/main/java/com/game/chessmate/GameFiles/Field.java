@@ -32,6 +32,7 @@ public class Field extends View {
     private boolean update;
     private boolean blocked=false;
     private boolean legal = false;
+    private boolean isProtected=false;
 
     /**
      * Constructor of Field. Set coordinates, compute color of the Rectangle with x and y, and construct the rectangle
@@ -109,7 +110,8 @@ public class Field extends View {
      * Sets the rectangle to its default color based on the chessboard layout.
      */
     public void setRectangleDefaultColor(){
-        color.setColor((this.x + this.y) % 2 == 0 ? Color.parseColor("#838381") : Color.parseColor("#d5d8db"));
+        if(this.isBlocked()==false)
+            color.setColor((this.x + this.y) % 2 == 0 ? Color.parseColor("#838381") : Color.parseColor("#d5d8db"));
     }
 
     public void setCurrentPiece(ChessPiece currentPiece) {
@@ -140,11 +142,32 @@ public class Field extends View {
         this.update = update;
     }
 
-    public  void setPlayingPieceShield(){color.setColor(Color.BLUE);}
+    public  void setPlayingPieceShield(){
+        setProtected(true);
+        color.setColor(Color.BLUE);
+    }
 
-    public void setBlocked(){
-        this.blocked=true;
-        color.setColor(Color.RED);}
+    public void setBlocked() {
+        this.blocked = true;
+        color.setColor(Color.RED);
+    }
 
     public boolean isBlocked(){return this.blocked;}
+
+    public void markChampion(){
+        color.setColor(Color.YELLOW);
+    }
+
+    public boolean isEven (){
+        if ((this.x+this.y)%2==0)
+            return true;
+        return false;
+    }
+
+    public boolean isProtected(){return this.isProtected;}
+    public void setProtected(boolean isProtected){this.isProtected=isProtected;}
+
+    public void setAsChecking() {
+        this.color.setColor(Color.RED);
+    }
 }
