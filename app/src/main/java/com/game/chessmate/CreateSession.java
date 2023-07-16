@@ -22,28 +22,34 @@ public class CreateSession extends AppCompatActivity {
 
         ChessMateClient.getInstance();
 
-        Button createSession=(Button) findViewById(R.id.createSessionButton);
-        Button joinSession=(Button) findViewById(R.id.joinSessionButton);
+        Button createSession = findViewById(R.id.createSessionButton);
+        Button joinSession = findViewById(R.id.joinSessionButton);
+        Button rulesButton = findViewById(R.id.rulesButton);
 
         TextView namedisplay = findViewById(R.id.playerName);
         String name = getIntent().getExtras().getString("name");
 
-        namedisplay.setText("Welcome "+ name);
+        namedisplay.setText("Welcome " + name);
 
         createSession.setOnClickListener(v -> {
             String lobbycode = NetworkManager.createSession(name);
-            if(lobbycode!=null){
+            if (lobbycode != null) {
                 Intent toLobbyIntent = new Intent(this, Lobby.class);
-                toLobbyIntent.putExtra("playername1",name);
-                toLobbyIntent.putExtra("lobbycode",lobbycode);
+                toLobbyIntent.putExtra("playername1", name);
+                toLobbyIntent.putExtra("lobbycode", lobbycode);
                 startActivity(toLobbyIntent);
             }
         });
 
         joinSession.setOnClickListener(v -> {
             Intent joinSessionIntent = new Intent(this, EnterCodeActivity.class);
-            joinSessionIntent.putExtra("name",name);
+            joinSessionIntent.putExtra("name", name);
             startActivity(joinSessionIntent);
+        });
+
+        rulesButton.setOnClickListener(view -> {
+            Intent ruleIntent = new Intent(this, RuleActivity.class);
+            startActivity(ruleIntent);
         });
     }
 }
