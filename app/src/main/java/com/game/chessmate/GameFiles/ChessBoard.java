@@ -75,11 +75,12 @@ public class ChessBoard {
     private ChessPieceColour clickedPieceColor;
     private ChessPieceType clickedPieceType;
 
+
+    private boolean soundOn;
+
     private ChessBoard() {
         this.boardFields = new Field[8][8];
-        localPlayer = new Player(ChessPieceColour.WHITE);
-        enemyPlayer = new Player(ChessPieceColour.BLACK);
-
+        soundOn = true;
         deck = new Deck();
     }
 
@@ -125,6 +126,7 @@ public class ChessBoard {
 
     /**
      * Initializes the pieces for player1. See initPieces for details on the creation.
+     *
      */
     private void initPiecesLocalPlayer(ChessPieceColour color) {
         Bitmap pawn = localPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getPawnWhite() : ResourceLoader.getPawnBlack();
@@ -153,6 +155,7 @@ public class ChessBoard {
 
     /**
      * Initializes the pieces for player2. See initPieces for details on the creation.
+     *
      */
     private void initPiecesEnemyPlayer(ChessPieceColour color) {
         Bitmap pawn = enemyPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getPawnWhite() : ResourceLoader.getPawnBlack();
@@ -193,7 +196,7 @@ public class ChessBoard {
     private Field startPosition;
     private Field endPosition;
     private ChessPiece movedPiece;
-    private boolean moveWasLegal = false;
+    private boolean moveWasLegal=true;
 
     /**
      * Handles onTouchEvent fired by the BoardView (onTouchEvent) when the View is clicked on.
@@ -215,7 +218,6 @@ public class ChessBoard {
         int touchY = (int)event.getY();
         Rect rect;
 
-        resetLegalMoves();
         for (int i = 0; i < boardFields.length; i++) {
             for (int j = 0; j < boardFields[i].length; j++) {
                 rect = boardFields[i][j].getRectangle();
@@ -231,12 +233,16 @@ public class ChessBoard {
                     }
 
                     //check which pieces are threatening and colour their fields
+                    localKing = getLocalKing();
                     if(localKing.isChecked(boardFields)){
                         for(Field f : localKing.getIsChecking()){
                             f.setAsChecking();
+                            f.invalidate();
                         }
                         if(checkMate()){
-                            //GAME IS OVER - TODO
+                            Log.d("debug", "I LOST!!!");
+                            gameState = gameState.LOOSE;
+                            //send gamestate win to enemy
                         }
                     }
 
@@ -270,31 +276,46 @@ public class ChessBoard {
 
                             endPosition = clickedField;
 
-                            localPlayer.getLastSelectedField().getCurrentPiece().move(clickedField);
-                            localPlayer.getLastSelectedField().getCurrentPiece().setFirstMove(false); //so that pawn has limited legal moves next time
-                            localPlayer.setLastSelectedField(null);
-                            resetLegalMoves();
-
-
                             if (GameActivity.cheatButtonStatus()) {
                                 localPlayer.setLegalMovesForCheat(movedPiece.getLegalFields());
                                 if ((localPlayer.getLegalMovesForCheat().contains(endPosition))) {
                                     moveWasLegal = true;
+                                    localPlayer.setWasLeganMove(true);
                                     Log.d("Move********TRUE", String.valueOf(moveWasLegal));
                                 } else {
                                     moveWasLegal = false;
+                                    localPlayer.setWasLeganMove(false);
                                     Log.d("Move_______FALSE", String.valueOf(moveWasLegal));
                                 }
                             }
-
+                            localPlayer.getLastSelectedField().getCurrentPiece().move(clickedField);
+                            localPlayer.getLastSelectedField().getCurrentPiece().setFirstMove(false); //so that pawn has limited legal moves next time
+                            localPlayer.setLastSelectedField(null);
+                            resetLegalMoves();
+                            resetCheckedFields();
+                            localKing = getLocalKing();
                         } else {
                             localPlayer.setLastSelectedField(null);
                         }
 
-                        resetLegalMoves();//to make red fields disappear
+                        resetLegalMoves();
+                    }
+                    if(localKing.isChecked(boardFields)) {
+                        for (Field f : localKing.getIsChecking()) {
+                            f.setAsChecking();
+                            f.invalidate();
+                        }
                     }
                 }
             }
+        }
+    }
+
+    private void resetCheckedFields() {
+        ChessPiece localKing = getLocalKing();
+        for (Field f : localKing.getIsChecking()){
+            f.setRectangleDefaultColor();
+            f.setUpdate(true);
         }
     }
 
@@ -317,6 +338,7 @@ public class ChessBoard {
                     if (boardFields[i][j].getCurrentPiece().getPlayingPieceType() == ChessPieceType.KING && boardFields[i][j].getCurrentPiece().getColour() == localPlayer.getColor()) {
                         return boardFields[i][j].getCurrentPiece();
                     }
+
                 }
             }
         }
@@ -696,7 +718,7 @@ public class ChessBoard {
         return endPosition;
     }
 
-    private void resetLegalMoves() {
+    public void resetLegalMoves() {
         for (Field f : localPlayer.getLegalMovesSelected()) {
             f.setRectangleDefaultColor();
             f.setAsIllegal();
@@ -832,6 +854,7 @@ public class ChessBoard {
         return enemyPlayer;
     }
 
+
     public GameState getGameState() {
         return gameState;
     }
@@ -880,5 +903,21 @@ public class ChessBoard {
 
     public Card getCurrentCard() {
         return currentCard;
+    }
+
+    public boolean isSoundOn() {
+        return soundOn;
+    }
+
+    public void setSoundOn(boolean soundOn) {
+        this.soundOn = soundOn;
+    }
+
+    public ChessPiece getMovedPiece() {
+        return movedPiece;
+    }
+
+    public void setMovedPiece(ChessPiece movedPiece) {
+        this.movedPiece = movedPiece;
     }
 }

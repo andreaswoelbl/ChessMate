@@ -49,13 +49,9 @@ public class Knight extends ChessPiece {
                 if (i < 8 && i >= 0 && j < 8 && j >= 0 && !(i == currentPosition.getFieldX() && j == currentPosition.getFieldY())) {
                     if (!currentFields[i][j].isBlocked()&&!isBlocked) {
                         if (currentFields[i][j].getCurrentPiece() == null) {
-                            if(!wouldbeChecked(currentFields, currentFields[i][j])){//piece can only move to legal field if it does not cause the king to be in check
-                                legalFields.add(currentFields[i][j]);
-                            }
+                            legalFields.add(currentFields[i][j]);
                         } else if (currentFields[i][j].getCurrentPiece().getColour() != this.colour&&!currentFields[i][j].isProtected()) {
-                            if(!wouldbeChecked(currentFields, currentFields[i][j])){//piece can only move to legal field if it does not cause the king to be in check
-                                legalFields.add(currentFields[i][j]);
-                            }
+                            legalFields.add(currentFields[i][j]);
                         }
                     }
                     isBlocked=false;

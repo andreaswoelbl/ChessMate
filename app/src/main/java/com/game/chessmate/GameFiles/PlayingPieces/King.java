@@ -47,13 +47,9 @@ public class King extends ChessPiece {
                 if (i >= 0 && i <= 7 && j >= 0 && j <= 7) {
                     if (!(i == currentPosition.getFieldX() && j == currentPosition.getFieldY())) {
                         if (currentFields[i][j].getCurrentPiece() == null) {
-                            if(!wouldbeChecked(currentFields, currentFields[i][j])){//piece can only move to legal field if it does not cause the king to be in check
-                                legalFields.add(currentFields[i][j]);
-                            }
+                            legalFields.add(currentFields[i][j]);
                         } else if (currentFields[i][j].getCurrentPiece().getColour() != this.colour) {
-                            if(!wouldbeChecked(currentFields, currentFields[i][j])){//piece can only move to legal field if it does not cause the king to be in check
-                                legalFields.add(currentFields[i][j]);
-                            }
+                            legalFields.add(currentFields[i][j]);
                         }
                     }
                 }
@@ -67,12 +63,12 @@ public class King extends ChessPiece {
     public boolean isChecked(Field[][] fields) {
         boolean result = false;
         for (int i = 0; i < fields.length; i++) {
-            for (int j = 0; j < fields.length; j++) {
+            for (int j = 0; j < fields[i].length; j++) {
                 if (fields[i][j].getCurrentPiece() != null) {//must be in seperate if - else possible null pointer exception
                     if (fields[i][j].getCurrentPiece().getColour() != this.getColour()) {
                         for (Field f : fields[i][j].getCurrentPiece().getLegalFields()) {
                             if (f.equals(currentPosition)) {
-                                isChecking.add(f);
+                                isChecking.add(fields[i][j]);
                                 result = true;
                             }
                         }
