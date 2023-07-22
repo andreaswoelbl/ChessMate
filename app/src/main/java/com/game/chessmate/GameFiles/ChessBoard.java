@@ -232,13 +232,16 @@ public class ChessBoard {
                         }
                     }
 
+                    Log.d("DEBUG", "CHECKING WHETHER KING IS CHECKED 1");
                     //check which pieces are threatening and colour their fields
                     localKing = getLocalKing();
                     if(localKing.isChecked(boardFields)){
                         for(Field f : localKing.getIsChecking()){
+                            Log.d("DEBUG", "KING IS CHECKED 1");
                             f.setAsChecking();
                             f.invalidate();
                         }
+                        Log.d("DEBUG", "CHECKING FOR CHECKMATE");
                         if(checkMate()){
                             Log.d("debug", "I LOST!!!");
                             gameState = gameState.LOOSE;
@@ -259,10 +262,11 @@ public class ChessBoard {
                                 } else {
                                     localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalFields());
                                 }
-
+                                Log.d("DEBUG", "FIRST CLICK");
                                 //overwrite normal legal moves if king is in check
                                 localKing = getLocalKing();
                                 if(localKing.isChecked(boardFields)){
+                                    Log.d("DEBUG", "KING IS CHECKED 2");
                                     localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalMovesInCheck());
                                 }
 
@@ -292,6 +296,7 @@ public class ChessBoard {
                             localPlayer.getLastSelectedField().getCurrentPiece().setFirstMove(false); //so that pawn has limited legal moves next time
                             localPlayer.setLastSelectedField(null);
                             resetLegalMoves();
+                            Log.d("DEBUG", "RESETTING CHECKEDFIELDS");
                             resetCheckedFields();
                             localKing = getLocalKing();
                         } else {
@@ -300,8 +305,10 @@ public class ChessBoard {
 
                         resetLegalMoves();
                     }
+
                     if(localKing.isChecked(boardFields)) {
                         for (Field f : localKing.getIsChecking()) {
+                            Log.d("DEBUG", "KING IS CHECKED 3");
                             f.setAsChecking();
                             f.invalidate();
                         }
@@ -311,6 +318,10 @@ public class ChessBoard {
         }
     }
 
+    /**
+     * Resets fields that are coloured differently, because they were checking the king.
+     * Resets their colour back to default.
+     */
     private void resetCheckedFields() {
         ChessPiece localKing = getLocalKing();
         for (Field f : localKing.getIsChecking()){
@@ -319,6 +330,10 @@ public class ChessBoard {
         }
     }
 
+    /**
+     * Checks whether the localplayer is in checkmate, by checking whether all restricted legal moves when king is in check (legalMovesInCheck) of all pieces of
+     * the localPlayer are empty. This way the localplayer can not make a move that saves him out of check so it is checkmate.
+     */
     private boolean checkMate() {
         boolean result = true;
         for(ChessPiece p : localPlayer.getChessPiecesAlive()){
@@ -329,8 +344,10 @@ public class ChessBoard {
         return result;
     }
 
-
-    //searches for local king and returns - could also be used for game over
+    /**
+     * Searches all fields in boardFields to get King of localPlayer (color determines) and returns him.
+     * @return king of localPlayer
+     */
     public ChessPiece getLocalKing() {
         for (int i = 0; i < boardFields.length; i++) {
             for (int j = 0; j < boardFields[i].length; j++) {

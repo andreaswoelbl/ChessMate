@@ -58,8 +58,13 @@ public class King extends ChessPiece {
         return legalFields;
     }
 
-    //checks whether king / this piece would still be in check
-    //then also sets isChecking
+    /**
+     * Method determines whether king is checked, by looking through legalMoves of enemy pieces and determining whether king is in legalMoves of enemy.
+     * Also sets ArrayList isChecking to all enemy pieces that are checking king.
+     *
+     * @param fields current layout of fields and their pieces from chessboard
+     * @return boolean whether king is in check
+     */
     public boolean isChecked(Field[][] fields) {
         boolean result = false;
         for (int i = 0; i < fields.length; i++) {
@@ -80,7 +85,13 @@ public class King extends ChessPiece {
     }
 
 
-    //checks whether king / this piece would still be in check if he moved to this field - if yes this field can not be moved to !!
+    /**
+     * Method determines whether king would still be checked, if king were to move to Field f.
+     *
+     * @param currentFields current layout of fields and their pieces from chessboard
+     * @param f field that is theoretically moved to
+     * @return boolean whether king would be in check if king moved to field f
+     */
     @Override
     public boolean wouldbeChecked(Field [][] currentFields, Field f) {
         Field realPosition = currentPosition;

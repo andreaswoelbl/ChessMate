@@ -466,12 +466,23 @@ abstract public class ChessPiece extends View {
 
     public boolean isChampion(){return this.isChampion;}
 
-    //same for every piece except king - king overrides and checks whether he is still in check
+    /**
+     * Method determines whether king is checked, by calling isChecked()-method of king. isChecked()-method is overridden in king.
+     *
+     * @param boardFields current layout of fields and their pieces from chessboard
+     * @return boolean whether king is in check
+     */
     public boolean isChecked(Field[][] boardFields){
         ChessPiece localKing = ChessBoard.getInstance().getLocalKing();
         return localKing.isChecked(ChessBoard.getInstance().getBoardFields());
     }
 
+    /**
+     * Calculated legalFields that can be moved to when king is in check. Normal legalFields are taken.
+     * Only fields that free the king out of check are copied into legalMovesInCheck Array.
+     *
+     * @return ArrayList of fields that can be moved to by piece (that frees king out of check), if king is in check
+     */
     //king is in check - this legal moves is called instead -- same for every chesspiece
     public ArrayList<Field> getLegalMovesInCheck(){
         ArrayList<Field> legalFields = this.getLegalFields();
@@ -491,7 +502,13 @@ abstract public class ChessPiece extends View {
         return legalMovesInCheck;
     }
 
-    //same for every piece except king - king overrides
+    /**
+     * Method determines whether king would still be checked, if piece were to move to Field f. Method is overridden in king.
+     *
+     * @param currentFields current layout of fields and their pieces from chessboard
+     * @param f field that is theoretically moved to
+     * @return boolean whether king would be in check if piece moved to field f
+     */
     protected boolean wouldbeChecked(Field[][] currentFields, Field f){
         ChessPiece localKing = ChessBoard.getInstance().getLocalKing();
         Field realPosition = this.currentPosition;
