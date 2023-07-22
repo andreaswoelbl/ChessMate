@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.game.chessmate.GameFiles.ChessBoard;
 import com.game.chessmate.GameFiles.Deck;
+import com.game.chessmate.GameFiles.Player;
 
 /**
  * The type Game activity.
@@ -96,6 +97,7 @@ public class GameActivity extends AppCompatActivity {
 
 
         Button cheatButton = getCheatButton();
+        Player localplayer = ChessBoard.getInstance().getLocalPlayer();
 
 
         cheatButton.setOnClickListener(new View.OnClickListener() {
@@ -104,12 +106,14 @@ public class GameActivity extends AppCompatActivity {
 
                 if (cheatButton.getText().toString().matches("Cheat Off")) {
                     cheatButton.setText("Cheat On");
+                    localplayer.setCheatOn(true);
                     isCheatOn = true;
                     cheatButton.setBackgroundColor(getResources().getColor(R.color.purple_200));
 
                 } else if (cheatButton.getText().toString().matches("Cheat On")) {
                     cheatButton.setText("Cheat Off");
                     isCheatOn = false;
+                    localplayer.setCheatOn(false);
                     cheatButton.setBackgroundColor(getResources().getColor(R.color.black));
 
                 }
