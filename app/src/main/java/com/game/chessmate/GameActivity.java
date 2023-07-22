@@ -62,6 +62,8 @@ public class GameActivity extends AppCompatActivity {
 
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        Button cheatButton = getCheatButton();
+        Player player = ChessBoard.getInstance().getLocalPlayer();
 
         if (sensor == null) {
             Toast.makeText(this, "your device has no light sensore, so you wont be able to use the cheat funktion", Toast.LENGTH_SHORT).show();
@@ -72,9 +74,9 @@ public class GameActivity extends AppCompatActivity {
         lightEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                float lightValue = sensorEvent.values[0];
+                player.setLightValue(sensorEvent.values[0]);
                 //float closeSensor = maxValue/100;
-                if (lightValue <= 500 && cheatButtonStatus()) {
+                if (sensorEvent.values[0] <= 500 && cheatButtonStatus()) {
                     if (ChessBoard.getInstance().getwasMoveLegal()) {
 
                         //TODO Player has to stop for one round
@@ -95,18 +97,13 @@ public class GameActivity extends AppCompatActivity {
             }
         };
 
-
-        Button cheatButton = getCheatButton();
-        Player localplayer = ChessBoard.getInstance().getLocalPlayer();
-
-
         cheatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if (cheatButton.getText().toString().matches("Cheat Off")) {
                     cheatButton.setText("Cheat On");
-                    localplayer.setCheatOn(true);
+                    player.setCheatOn(true);
                     isCheatOn = true;
                     cheatButton.setBackgroundColor(getResources().getColor(R.color.purple_200));
 
@@ -114,7 +111,7 @@ public class GameActivity extends AppCompatActivity {
                     cheatButton.setText("Cheat Off");
                     isCheatOn = false;
                     ChessBoard.getInstance().resetLegalMoves();
-                    localplayer.setCheatOn(false);
+                    player.setCheatOn(false);
                     cheatButton.setBackgroundColor(getResources().getColor(R.color.black));
 
                 }
