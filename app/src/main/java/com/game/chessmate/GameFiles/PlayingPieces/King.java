@@ -67,6 +67,7 @@ public class King extends ChessPiece {
      */
     public boolean isChecked(Field[][] fields) {
         boolean result = false;
+        isChecking = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             for (int j = 0; j < fields[i].length; j++) {
                 if (fields[i][j].getCurrentPiece() != null) {//must be in seperate if - else possible null pointer exception

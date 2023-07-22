@@ -242,7 +242,7 @@ public class ChessBoard {
                             f.invalidate();
                         }
                         Log.d("DEBUG", "CHECKING FOR CHECKMATE");
-                        if(checkMate()){
+                        if(checkMate() || getLocalKing() == null){
                             Log.d("debug", "I LOST!!!");
                             gameState = gameState.LOOSE;
                             //send gamestate win to enemy
@@ -293,26 +293,25 @@ public class ChessBoard {
                                 }
                             }
                             localPlayer.getLastSelectedField().getCurrentPiece().move(clickedField);
+                            resetCheckedFields();
+                            localKing = getLocalKing();
+                            if(localKing.isChecked(boardFields)) {
+                                for (Field f : localKing.getIsChecking()) {
+                                    Log.d("DEBUG", "KING IS CHECKED 3");
+                                    f.setAsChecking();
+                                    //f.invalidate();
+                                    f.setUpdate(true);
+                                }
+                            }
                             localPlayer.getLastSelectedField().getCurrentPiece().setFirstMove(false); //so that pawn has limited legal moves next time
                             localPlayer.setLastSelectedField(null);
                             resetLegalMoves();
-                            Log.d("DEBUG", "RESETTING CHECKEDFIELDS");
-                            resetCheckedFields();
-                            localKing = getLocalKing();
                         } else {
                             localPlayer.setLastSelectedField(null);
                         }
-
                         resetLegalMoves();
                     }
 
-                    if(localKing.isChecked(boardFields)) {
-                        for (Field f : localKing.getIsChecking()) {
-                            Log.d("DEBUG", "KING IS CHECKED 3");
-                            f.setAsChecking();
-                            f.invalidate();
-                        }
-                    }
                 }
             }
         }
@@ -368,8 +367,13 @@ public class ChessBoard {
         int touchX = (int) event.getX();
         int touchY = (int) event.getY();
         Rect rect;
-        ArrayList<Field> legalMoves;
 
+        //cheat-Function is not permitted here
+        if (GameActivity.cheatButtonStatus()){
+            GameActivity.unselectAfterCardActivation();
+        }
+
+        //get currentPlayerCards, current Color, mark card activated and setz currentCard
         Card[] cards = localPlayer.getCurrentCards();
         localPlayerColor = localPlayer.getColor();
         isCardActivated=true;
@@ -391,7 +395,7 @@ public class ChessBoard {
                     }
 
                     //do action depending on card
-                    switch (cards[id].getId()) {
+                    switch (getCurrentCard().getId()){//cards[id].getId()) {
                         case 0: //cowardice
                             if (localPlayer.getLastSelectedField() == null) { //first click
                                 if (clickedPiece != null && clickedPieceType == ChessPieceType.PAWN && clickedPieceColor != localPlayerColor) {
@@ -905,17 +909,17 @@ public class ChessBoard {
         Field field1=playingPiece1.getPosition();
         Field field2=playingPiece2.getPosition();
 
-        playingPiece1.setSwapPiece(playingPiece2);
-        playingPiece2.setSwapPiece(playingPiece1);
-
-        playingPiece1.move(playingPiece2.getPosition());
-        playingPiece2.move(playingPiece1.getPosition());
+     /*   playingPiece1.setSwapPiece(playingPiece2);
+        playingPiece2.setSwapPiece(playingPiece1);*/
 
         field1.setCurrentPiece(playingPiece2);
         playingPiece2.setCurrentPosition(field1);
 
         field2.setCurrentPiece(playingPiece1);
         playingPiece1.setCurrentPosition(field2);
+
+        playingPiece1.setUpdateView(true);
+        playingPiece2.setUpdateView(true);
     }
 
     public Card getCurrentCard() {
