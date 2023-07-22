@@ -113,6 +113,7 @@ public class GameActivity extends AppCompatActivity {
                 } else if (cheatButton.getText().toString().matches("Cheat On")) {
                     cheatButton.setText("Cheat Off");
                     isCheatOn = false;
+                    ChessBoard.getInstance().resetLegalMoves();
                     localplayer.setCheatOn(false);
                     cheatButton.setBackgroundColor(getResources().getColor(R.color.black));
 
