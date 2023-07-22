@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.game.chessmate.GameFiles.CheatFunktion;
 import com.game.chessmate.GameFiles.ChessBoard;
 import com.game.chessmate.GameFiles.Deck;
 import com.game.chessmate.GameFiles.Player;
@@ -66,10 +67,13 @@ public class GameActivity extends AppCompatActivity {
         Player player = ChessBoard.getInstance().getLocalPlayer();
 
         if (sensor == null) {
-            Toast.makeText(this, "your device has no light sensore, so you wont be able to use the cheat funktion", Toast.LENGTH_SHORT).show();
-            //TODO stop cheat function when no sensor is avaliable
+            Toast.makeText(this, "Your device has no light sensor, so you won't be able to use the cheat function", Toast.LENGTH_SHORT).show();
+            CheatFunktion.setCheatFunction(false);
+        } else {
+            CheatFunktion.setCheatFunction(true);
         }
         maxValue = sensor.getMaximumRange();
+        CheatFunktion cheatFunktion = new CheatFunktion(GameActivity.this);
         //Log.d("Sensor", String.valueOf(maxValue));
         lightEventListener = new SensorEventListener() {
             @Override
@@ -77,17 +81,7 @@ public class GameActivity extends AppCompatActivity {
                 player.setLightValue(sensorEvent.values[0]);
                 //float closeSensor = maxValue/100;
                 if (sensorEvent.values[0] <= 500 && cheatButtonStatus()) {
-                    if (ChessBoard.getInstance().getwasMoveLegal()) {
-
-                        //TODO Player has to stop for one round
-                    } else {
-                        ChessBoard.getInstance().getStartPossition();
-                        //TODO move piece back to start possition
-
-                    }
-                    //Log.d("SENSOR", String.valueOf(lightValue));
-                    //TODO and person who pressedn cheat button made a move then we need to check if the move was legal
-                    //  ChessBoard.getwasMoveLegal();
+                    cheatFunktion.determineCheat();
                 }
             }
 
