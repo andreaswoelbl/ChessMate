@@ -25,6 +25,7 @@ public class CreateSession extends AppCompatActivity {
         Button createSession = findViewById(R.id.createSessionButton);
         Button joinSession = findViewById(R.id.joinSessionButton);
         Button rulesButton = findViewById(R.id.rulesButton);
+        Button optionsButton = findViewById(R.id.optionsButton);
 
         TextView namedisplay = findViewById(R.id.playerName);
         String name = getIntent().getExtras().getString("name");
@@ -50,6 +51,11 @@ public class CreateSession extends AppCompatActivity {
         rulesButton.setOnClickListener(view -> {
             Intent ruleIntent = new Intent(this, RuleActivity.class);
             startActivity(ruleIntent);
+        });
+
+        optionsButton.setOnClickListener(view -> {
+            Intent optionsIntent = new Intent(this, OptionsActivity.class);
+            startActivity(optionsIntent);
         });
     }
 }

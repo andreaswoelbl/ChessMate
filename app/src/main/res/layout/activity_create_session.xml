@@ -22,9 +22,17 @@
         style="@style/DefaultButton"
         android:layout_marginBottom="20dp"
         android:text="Join Session"
+        app:layout_constraintBottom_toTopOf="@+id/optionsButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/optionsButton"
+        style="@style/DefaultButton"
+        android:layout_marginBottom="20dp"
+        android:text="Options"
         app:layout_constraintBottom_toTopOf="@+id/rulesButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
