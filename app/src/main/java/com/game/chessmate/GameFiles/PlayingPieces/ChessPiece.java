@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +17,8 @@ import com.game.chessmate.GameFiles.Field;
 import com.game.chessmate.GameFiles.GameState;
 import com.game.chessmate.GameFiles.Networking.NetworkManager;
 import com.game.chessmate.GameFiles.Vector;
+import com.game.chessmate.OptionsActivity;
+import com.game.chessmate.R;
 
 import java.util.ArrayList;
 
@@ -50,14 +53,17 @@ abstract public class ChessPiece extends View {
     private int movementSpeed = 15;
     private boolean updateView;
     private boolean firstMove = true;
-    private boolean isProtected=false;
+    private boolean isProtected = false;
     private boolean isCaptured = false;
     private ChessBoard board;
     protected boolean opponentEncountered = false;
     private boolean isChampion=false;
     private boolean isSwapped=false;
     private ChessPiece swapPiece=null;
-    protected ArrayList<Field> isChecking;
+    private MediaPlayer moveSound_start;
+    private MediaPlayer moveSound_end;
+    private Context context;
+    protected ArrayList<Field> isChecking = new ArrayList<>();
 
     /**
      * Instantiates a new Chess piece.
@@ -69,13 +75,17 @@ abstract public class ChessPiece extends View {
      */
     protected ChessPiece(Context context, Field position, Bitmap sprite, ChessPieceColour colour) {
         super(context);
+        this.context = context;
         this.currentPosition = position;
         this.targetPosition = null;
         this.colour = colour;
-        this.offset = new Vector(0,0);
+        this.offset = new Vector(0, 0);
         this.updateMovementOffset = false;
         this.updateView = false;
         this.sprite = sprite;
+        this.moveSound_end = MediaPlayer.create(context,R.raw.chessmatemove_end);
+        this.moveSound_start.setVolume(1.0f,1.0f);
+        this.moveSound_end.setVolume(1.0f,1.0f);
     }
 
     /**
@@ -89,13 +99,15 @@ abstract public class ChessPiece extends View {
      */
     protected ChessPiece(Context context, @Nullable AttributeSet attrs, Field position, Bitmap sprite, ChessPieceColour colour) {
         super(context, attrs);
+        this.context = context;
         this.currentPosition = position;
         this.targetPosition = null;
         this.colour = colour;
-        this.offset = new Vector(0,0);
+        this.offset = new Vector(0, 0);
         this.updateMovementOffset = false;
         this.updateView = false;
         this.sprite = sprite;
+        this.moveSound_end = MediaPlayer.create(context,R.raw.chessmatemove_end);
     }
 
     /**
@@ -115,6 +127,7 @@ abstract public class ChessPiece extends View {
 
     /**
      * Draws the bitmap of this PlayingPiece to the canvas in the position of the containing rectangle.
+     *
      * @param canvas
      */
     @Override
@@ -123,10 +136,22 @@ abstract public class ChessPiece extends View {
         if (isCaptured) {
             Paint paint = new Paint();
             paint.setColor(Color.TRANSPARENT);
-            canvas.drawBitmap(this.sprite, field.getRectangle().left + (int)offset.getX(), field.getRectangle().top + (int)offset.getY(), paint);
+            canvas.drawBitmap(this.sprite, field.getRectangle().left + (int) offset.getX(), field.getRectangle().top + (int) offset.getY(), paint);
+        } else {
+            canvas.drawBitmap(this.sprite, field.getRectangle().left + (int) offset.getX(), field.getRectangle().top + (int) offset.getY(), null);
         }
-        else {
-            canvas.drawBitmap(this.sprite, field.getRectangle().left + (int)offset.getX(), field.getRectangle().top + (int)offset.getY(), null);
+    }
+
+    private void startPlayingMoveSound(){
+        board = ChessBoard.getInstance();
+        if (!board.isSoundOn()){
+            return;
+        }
+        try {
+            moveSound_start = MediaPlayer.create(this.context, R.raw.chessmatemove_start);
+            moveSound_start.start();
+        }catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -136,6 +161,7 @@ abstract public class ChessPiece extends View {
      * @param targetField the target field
      */
     public void move(Field targetField) {
+        startPlayingMoveSound();
 
         Field [][] currentFields=ChessBoard.getInstance().getBoardFields();
 
@@ -181,7 +207,7 @@ abstract public class ChessPiece extends View {
         Vector target = new Vector(targetPosition.getRectangle().left, targetPosition.getRectangle().top);
         Vector vector = target.sub(start);
 
-        if((offset.getX() != vector.getX()) || (offset.getY() != vector.getY())){
+        if ((offset.getX() != vector.getX()) || (offset.getY() != vector.getY())) {
             offset = offset.add(vector.div(this.movementSpeed));
             this.setUpdateView(true);
         }
@@ -194,24 +220,23 @@ abstract public class ChessPiece extends View {
      * Cleanup work after move. Update Positions of chessPieces and update fields.
      */
     private void afterMove() {
-        Log.i("GAMESTATE","afterMovestart: " + ChessBoard.getInstance().getGameState());
-        if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
-            NetworkManager.sendMove(currentPosition, targetPosition);
+        stopMoveSoundPlayEndSound();
 
-            if (ChessBoard.getInstance().isCardActivated()) {
-                Log.i("GAMESTATE", "afterCardstart: " + ChessBoard.getInstance().getGameState());
-                if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
-                    NetworkManager.sendCard(ChessBoard.getInstance().getDeck().getLastCardPlayed().getId(), currentPosition, targetPosition);
-                }
-            } else {
-                Log.i("GAMESTATE", "afterMovestart: " + ChessBoard.getInstance().getGameState());
-                if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
-                    NetworkManager.sendMove(currentPosition, targetPosition);
-                }
+        if (ChessBoard.getInstance().isCardActivated()){
+            Log.i("GAMESTATE", "afterCardstart: " + ChessBoard.getInstance().getGameState());
+            if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
+                NetworkManager.sendCard(ChessBoard.getInstance().getCurrentCard().getId(),currentPosition, targetPosition);
+            }
+        }
+
+        else {
+            Log.i("GAMESTATE", "afterMovestart: " + ChessBoard.getInstance().getGameState());
+            if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
+                NetworkManager.sendMove(currentPosition, targetPosition);
             }
         }
         this.updateMovementOffset = false;
-        this.offset = new Vector(0,0);
+        this.offset = new Vector(0, 0);
         currentPosition.setCurrentPiece(null);
         this.currentPosition = targetPosition;
         targetPosition.setCurrentPiece(this);
@@ -246,6 +271,18 @@ abstract public class ChessPiece extends View {
         }
     }
 
+    private void stopMoveSoundPlayEndSound(){
+        board = ChessBoard.getInstance();
+        if (!board.isSoundOn()){
+            return;
+        }
+        moveSound_start.stop();
+        moveSound_start.reset();
+        moveSound_end.reset();
+        moveSound_end = MediaPlayer.create(context,R.raw.chessmatemove_end);
+        moveSound_end.start();
+    }
+
     /**
      * Removes the drawing of this current piece from the canvas.
      */
@@ -255,8 +292,7 @@ abstract public class ChessPiece extends View {
         if (board.getLocalPlayer().getColor() == this.colour) {
             board.getLocalPlayer().addChessPiecesCaptured(this);
             board.getLocalPlayer().removeChessPiecesAlive(this);
-        }
-        else if(board.getEnemyPlayer().getColor() == this.colour) {
+        } else if (board.getEnemyPlayer().getColor() == this.colour) {
             board.getEnemyPlayer().addChessPiecesCaptured(this);
             board.getEnemyPlayer().removeChessPiecesAlive(this);
         }
@@ -275,7 +311,6 @@ abstract public class ChessPiece extends View {
         ArrayList<Field> cheatFields = new ArrayList<>();
 
 
-
         for (int fieldX = 0; fieldX < currentFields.length; fieldX++) {
             for (int fieldY = 0; fieldY < currentFields[fieldX].length; fieldY++) {
                 if (!currentFields[fieldX][fieldY].hasPiece()) {
@@ -284,7 +319,7 @@ abstract public class ChessPiece extends View {
 
             }
         }
-
+        Log.d("AMOUNT", String.valueOf(cheatFields.size()));
         return cheatFields;
     }
 
@@ -306,15 +341,17 @@ abstract public class ChessPiece extends View {
 
         for (int i = 0; i < cheatMoves.size(); i++) {
             result.add(cheatMoves.get(i));
-            for (int j = 0; j < legalMoves.size(); j++) {
-                if (!cheatMoves.contains(legalMoves.get(j))) {
-                    result.add(legalMoves.get(j));
-                }
+        }
+        for (int j = 0; j < legalMoves.size(); j++) {
+            if (!result.contains(legalMoves.get(j))) {
+                result.add(legalMoves.get(j));
             }
         }
-        Log.d("foreach", "wir sind hier");
-        for (Field f: result){
-            Log.d("Pawn cheat Moves",f.getChessCoordinates());}
+
+
+        Log.d("ALLLL FIIIIELDS", String.valueOf(result.size()));
+        // for (Field f: result){
+        //   Log.d("Pawn cheat Moves",f.getChessCoordinates());}
         return result;
     }
 
@@ -429,34 +466,57 @@ abstract public class ChessPiece extends View {
 
     public boolean isChampion(){return this.isChampion;}
 
-    //same for every piece except king - king overrides and checks whether he is still in check
+    /**
+     * Method determines whether king is checked, by calling isChecked()-method of king. isChecked()-method is overridden in king.
+     *
+     * @param boardFields current layout of fields and their pieces from chessboard
+     * @return boolean whether king is in check
+     */
     public boolean isChecked(Field[][] boardFields){
         ChessPiece localKing = ChessBoard.getInstance().getLocalKing();
         return localKing.isChecked(ChessBoard.getInstance().getBoardFields());
     }
 
-    //king is in check - this legal moves is called instead -- same for every chesspiece
+    /**
+     * Calculated legalFields that can be moved to when king is in check. Normal legalFields are taken.
+     * Only fields that free the king out of check are copied into legalMovesInCheck Array.
+     *
+     * @return ArrayList of fields that can be moved to by piece (that frees king out of check), if king is in check
+     */
     public ArrayList<Field> getLegalMovesInCheck(){
-        ArrayList<Field> legalFields = this.getLegalFields();
         Field[][] currentFields = ChessBoard.getInstance().getBoardFields();
+        ArrayList<Field> legalFields = this.getLegalFields();
         ChessPiece localKing = ChessBoard.getInstance().getLocalKing();
         ArrayList<Field> legalMovesInCheck = new ArrayList<Field>();
+        localKing.isChecked(currentFields); //to set isChecking
+        ArrayList<Field> isChecking = localKing.getIsChecking();
 
         for (Field f : legalFields) {
             if (!wouldbeChecked(currentFields, f)) {//checks whether king would be in check if currentpieces position were field - same for king
+                legalMovesInCheck.add(f);
+            }
+            if(isChecking.contains(f)){//if piece can kill threatening piece
                 legalMovesInCheck.add(f);
             }
         }
         return legalMovesInCheck;
     }
 
-    //same for every piece except king - king overrides
+    /**
+     * Method determines whether king would still be checked, if piece were to move to Field f. Method is overridden in king.
+     *
+     * @param currentFields current layout of fields and their pieces from chessboard
+     * @param f field that is theoretically moved to
+     * @return boolean whether king would be in check if piece moved to field f
+     */
     protected boolean wouldbeChecked(Field[][] currentFields, Field f){
         ChessPiece localKing = ChessBoard.getInstance().getLocalKing();
-        Field realPosition = this.currentPosition;
-        this.currentPosition = f; //what would happen if chesspiece had this field as position
+        this.getPosition().setCurrentPiece(null);//moving away from current field so it is empty
+        ChessPiece realPiece = f.getCurrentPiece();//temporary save
+        f.setCurrentPiece(this);//"move to field"
         boolean result = localKing.isChecked(currentFields);//would king still be in check?
-        this.currentPosition = realPosition; //resetting to real position
+        this.getPosition().setCurrentPiece(this);//move back
+        f.setCurrentPiece(realPiece);//move piece back
         return result;
     }
 

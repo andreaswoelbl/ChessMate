@@ -16,6 +16,10 @@ public class Player {
     private ArrayList<Field> legalMovesSelected;
     private Field lastSelectedField;
     private ChessPieceColour color;
+    private boolean cheatOn;
+    private float lightValue;
+    private boolean wasLeganMove;
+    private int timesCheatFunktionUsedWrongly;
 
     /**
      * Instantiates a new Player.
@@ -28,6 +32,18 @@ public class Player {
         this.legalMovesSelected = new ArrayList<>();
         this.lastSelectedField = null;
         this.color = color;
+        this.cheatOn = false;
+        this.wasLeganMove = true;
+        this.timesCheatFunktionUsedWrongly = 0;
+    }
+
+
+    public boolean getCheatOn() {
+        return cheatOn;
+    }
+
+    public void setCheatOn(boolean cheatOn) {
+        this.cheatOn = cheatOn;
     }
 
     /**
@@ -135,5 +151,30 @@ public class Player {
 
     public void setLegalMovesForCheat(ArrayList<Field> legalMovesForCheat) {
         this.legalMovesForCheat = legalMovesForCheat;
+    }
+
+    public float getLightValue() {
+        return lightValue;
+    }
+
+
+    public void setLightValue(float lightValue) {
+        this.lightValue = lightValue;
+    }
+
+    public boolean getWasLeganMove() {
+        return wasLeganMove;
+    }
+
+    public void setWasLeganMove(boolean wasLeganMove) {
+        this.wasLeganMove = wasLeganMove;
+    }
+
+    public int getTimesCheatFunktionUsedWrongly() {
+        return timesCheatFunktionUsedWrongly;
+    }
+
+    public void setTimesCheatFunktionUsedWrongly(int timesCheatFunktionUsedWrongly) {
+        this.timesCheatFunktionUsedWrongly = timesCheatFunktionUsedWrongly;
     }
 }

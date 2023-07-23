@@ -2,7 +2,8 @@ package NetObjects;
 
 public class PlayerDataObject {
     String name;
-    boolean color;
+    ChessPieceColour chessPieceColour;
+    int maxWrongCheatReveal;
 
     public PlayerDataObject(){}
 
@@ -10,15 +11,19 @@ public class PlayerDataObject {
         return name;
     }
 
-    public boolean isColor() {
-        return color;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setColor(boolean color) {
-        this.color = color;
+    public ChessPieceColour getChessPieceColour() { return chessPieceColour; }
+
+    public void setChessPieceColour(ChessPieceColour chessPieceColour) {
+        this.chessPieceColour = chessPieceColour;
+    }
+
+    public int getMaxWrongCheatReveal() { return maxWrongCheatReveal; }
+
+    public void setMaxWrongCheatReveal(int maxWrongCheatReveal) {
+        this.maxWrongCheatReveal = maxWrongCheatReveal;
     }
 }

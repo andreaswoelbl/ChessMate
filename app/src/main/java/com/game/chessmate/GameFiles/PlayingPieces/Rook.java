@@ -45,15 +45,11 @@ public class Rook extends ChessPiece {
                 if(!(i == currentPosition.getFieldX() && j == currentPosition.getFieldY()) &&!opponentEncountered){
                     if (currentFields[i][j].getCurrentPiece() == null) {
                         if(!currentFields[i][j].isBlocked())
-                            if(!wouldbeChecked(currentFields, currentFields[i][j])){//piece can only move to legal field if it does not cause the king to be in check
-                                legalFields.add(currentFields[i][j]);
-                            }
-                            else
-                                break;
-                    } else if (currentFields[i][j].getCurrentPiece().getColour() != this.colour&&!currentFields[i][j].isProtected()) {
-                        if(!wouldbeChecked(currentFields, currentFields[i][j])){//piece can only move to legal field if it does not cause the king to be in check
                             legalFields.add(currentFields[i][j]);
-                        }
+                        else
+                            break;
+                    } else if (currentFields[i][j].getCurrentPiece().getColour() != this.colour&&!currentFields[i][j].isProtected()) {
+                        legalFields.add(currentFields[i][j]);
                         opponentEncountered = true;
                     }else{
                         break; //breaks out of while - done with current direction

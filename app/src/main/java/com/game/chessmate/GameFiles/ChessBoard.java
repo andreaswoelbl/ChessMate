@@ -75,11 +75,12 @@ public class ChessBoard {
     private ChessPieceColour clickedPieceColor;
     private ChessPieceType clickedPieceType;
 
+
+    private boolean soundOn;
+
     private ChessBoard() {
         this.boardFields = new Field[8][8];
-        localPlayer = new Player(ChessPieceColour.WHITE);
-        enemyPlayer = new Player(ChessPieceColour.BLACK);
-
+        soundOn = true;
         deck = new Deck();
     }
 
@@ -125,6 +126,7 @@ public class ChessBoard {
 
     /**
      * Initializes the pieces for player1. See initPieces for details on the creation.
+     *
      */
     private void initPiecesLocalPlayer(ChessPieceColour color) {
         Bitmap pawn = localPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getPawnWhite() : ResourceLoader.getPawnBlack();
@@ -153,6 +155,7 @@ public class ChessBoard {
 
     /**
      * Initializes the pieces for player2. See initPieces for details on the creation.
+     *
      */
     private void initPiecesEnemyPlayer(ChessPieceColour color) {
         Bitmap pawn = enemyPlayer.getColor() == ChessPieceColour.WHITE ? ResourceLoader.getPawnWhite() : ResourceLoader.getPawnBlack();
@@ -193,7 +196,7 @@ public class ChessBoard {
     private Field startPosition;
     private Field endPosition;
     private ChessPiece movedPiece;
-    private boolean moveWasLegal = false;
+    private boolean moveWasLegal=true;
 
     /**
      * Handles onTouchEvent fired by the BoardView (onTouchEvent) when the View is clicked on.
@@ -215,7 +218,6 @@ public class ChessBoard {
         int touchY = (int)event.getY();
         Rect rect;
 
-        resetLegalMoves();
         for (int i = 0; i < boardFields.length; i++) {
             for (int j = 0; j < boardFields[i].length; j++) {
                 rect = boardFields[i][j].getRectangle();
@@ -230,13 +232,20 @@ public class ChessBoard {
                         }
                     }
 
+                    Log.d("DEBUG", "CHECKING WHETHER KING IS CHECKED 1");
                     //check which pieces are threatening and colour their fields
+                    localKing = getLocalKing();
                     if(localKing.isChecked(boardFields)){
                         for(Field f : localKing.getIsChecking()){
+                            Log.d("DEBUG", "KING IS CHECKED 1");
                             f.setAsChecking();
+                            f.invalidate();
                         }
-                        if(checkMate()){
-                            //GAME IS OVER - TODO
+                        Log.d("DEBUG", "CHECKING FOR CHECKMATE");
+                        if(checkMate() || getLocalKing() == null){
+                            Log.d("debug", "I LOST!!!");
+                            gameState = gameState.LOOSE;
+                            //send gamestate win to enemy
                         }
                     }
 
@@ -253,10 +262,11 @@ public class ChessBoard {
                                 } else {
                                     localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalFields());
                                 }
-
+                                Log.d("DEBUG", "FIRST CLICK");
                                 //overwrite normal legal moves if king is in check
                                 localKing = getLocalKing();
                                 if(localKing.isChecked(boardFields)){
+                                    Log.d("DEBUG", "KING IS CHECKED 2");
                                     localPlayer.setLegalMovesSelected(clickedField.getCurrentPiece().getLegalMovesInCheck());
                                 }
 
@@ -270,34 +280,59 @@ public class ChessBoard {
 
                             endPosition = clickedField;
 
-                            localPlayer.getLastSelectedField().getCurrentPiece().move(clickedField);
-                            localPlayer.getLastSelectedField().getCurrentPiece().setFirstMove(false); //so that pawn has limited legal moves next time
-                            localPlayer.setLastSelectedField(null);
-                            resetLegalMoves();
-
-
                             if (GameActivity.cheatButtonStatus()) {
                                 localPlayer.setLegalMovesForCheat(movedPiece.getLegalFields());
                                 if ((localPlayer.getLegalMovesForCheat().contains(endPosition))) {
                                     moveWasLegal = true;
+                                    localPlayer.setWasLeganMove(true);
                                     Log.d("Move********TRUE", String.valueOf(moveWasLegal));
                                 } else {
                                     moveWasLegal = false;
+                                    localPlayer.setWasLeganMove(false);
                                     Log.d("Move_______FALSE", String.valueOf(moveWasLegal));
                                 }
                             }
-
+                            localPlayer.getLastSelectedField().getCurrentPiece().move(clickedField);
+                            resetCheckedFields();
+                            localKing = getLocalKing();
+                            if(localKing.isChecked(boardFields)) {
+                                for (Field f : localKing.getIsChecking()) {
+                                    Log.d("DEBUG", "KING IS CHECKED 3");
+                                    f.setAsChecking();
+                                    //f.invalidate();
+                                    f.setUpdate(true);
+                                }
+                            }
+                            localPlayer.getLastSelectedField().getCurrentPiece().setFirstMove(false); //so that pawn has limited legal moves next time
+                            localPlayer.setLastSelectedField(null);
+                            resetLegalMoves();
                         } else {
                             localPlayer.setLastSelectedField(null);
                         }
-
-                        resetLegalMoves();//to make red fields disappear
+                        resetLegalMoves();
                     }
+
                 }
             }
         }
     }
 
+    /**
+     * Resets fields that are coloured differently, because they were checking the king.
+     * Resets their colour back to default.
+     */
+    private void resetCheckedFields() {
+        ChessPiece localKing = getLocalKing();
+        for (Field f : localKing.getIsChecking()){
+            f.setRectangleDefaultColor();
+            f.setUpdate(true);
+        }
+    }
+
+    /**
+     * Checks whether the localplayer is in checkmate, by checking whether all restricted legal moves when king is in check (legalMovesInCheck) of all pieces of
+     * the localPlayer are empty. This way the localplayer can not make a move that saves him out of check so it is checkmate.
+     */
     private boolean checkMate() {
         boolean result = true;
         for(ChessPiece p : localPlayer.getChessPiecesAlive()){
@@ -308,8 +343,10 @@ public class ChessBoard {
         return result;
     }
 
-
-    //searches for local king and returns - could also be used for game over
+    /**
+     * Searches all fields in boardFields to get King of localPlayer (color determines) and returns him.
+     * @return king of localPlayer
+     */
     public ChessPiece getLocalKing() {
         for (int i = 0; i < boardFields.length; i++) {
             for (int j = 0; j < boardFields[i].length; j++) {
@@ -317,6 +354,7 @@ public class ChessBoard {
                     if (boardFields[i][j].getCurrentPiece().getPlayingPieceType() == ChessPieceType.KING && boardFields[i][j].getCurrentPiece().getColour() == localPlayer.getColor()) {
                         return boardFields[i][j].getCurrentPiece();
                     }
+
                 }
             }
         }
@@ -329,8 +367,13 @@ public class ChessBoard {
         int touchX = (int) event.getX();
         int touchY = (int) event.getY();
         Rect rect;
-        ArrayList<Field> legalMoves;
 
+        //cheat-Function is not permitted here
+        if (GameActivity.cheatButtonStatus()){
+            GameActivity.unselectAfterCardActivation();
+        }
+
+        //get currentPlayerCards, current Color, mark card activated and setz currentCard
         Card[] cards = localPlayer.getCurrentCards();
         localPlayerColor = localPlayer.getColor();
         isCardActivated=true;
@@ -352,7 +395,7 @@ public class ChessBoard {
                     }
 
                     //do action depending on card
-                    switch (cards[id].getId()) {
+                    switch (getCurrentCard().getId()){//cards[id].getId()) {
                         case 0: //cowardice
                             if (localPlayer.getLastSelectedField() == null) { //first click
                                 if (clickedPiece != null && clickedPieceType == ChessPieceType.PAWN && clickedPieceColor != localPlayerColor) {
@@ -696,7 +739,7 @@ public class ChessBoard {
         return endPosition;
     }
 
-    private void resetLegalMoves() {
+    public void resetLegalMoves() {
         for (Field f : localPlayer.getLegalMovesSelected()) {
             f.setRectangleDefaultColor();
             f.setAsIllegal();
@@ -832,6 +875,7 @@ public class ChessBoard {
         return enemyPlayer;
     }
 
+
     public GameState getGameState() {
         return gameState;
     }
@@ -865,20 +909,36 @@ public class ChessBoard {
         Field field1=playingPiece1.getPosition();
         Field field2=playingPiece2.getPosition();
 
-        playingPiece1.setSwapPiece(playingPiece2);
-        playingPiece2.setSwapPiece(playingPiece1);
-
-        playingPiece1.move(playingPiece2.getPosition());
-        playingPiece2.move(playingPiece1.getPosition());
+     /*   playingPiece1.setSwapPiece(playingPiece2);
+        playingPiece2.setSwapPiece(playingPiece1);*/
 
         field1.setCurrentPiece(playingPiece2);
         playingPiece2.setCurrentPosition(field1);
 
         field2.setCurrentPiece(playingPiece1);
         playingPiece1.setCurrentPosition(field2);
+
+        playingPiece1.setUpdateView(true);
+        playingPiece2.setUpdateView(true);
     }
 
     public Card getCurrentCard() {
         return currentCard;
+    }
+
+    public boolean isSoundOn() {
+        return soundOn;
+    }
+
+    public void setSoundOn(boolean soundOn) {
+        this.soundOn = soundOn;
+    }
+
+    public ChessPiece getMovedPiece() {
+        return movedPiece;
+    }
+
+    public void setMovedPiece(ChessPiece movedPiece) {
+        this.movedPiece = movedPiece;
     }
 }

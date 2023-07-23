@@ -13,8 +13,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.game.chessmate.GameFiles.CheatFunktion;
 import com.game.chessmate.GameFiles.ChessBoard;
 import com.game.chessmate.GameFiles.Deck;
+import com.game.chessmate.GameFiles.Player;
 
 /**
  * The type Game activity.
@@ -61,30 +63,25 @@ public class GameActivity extends AppCompatActivity {
 
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        Button cheatButton = getCheatButton();
+        Player player = ChessBoard.getInstance().getLocalPlayer();
 
         if (sensor == null) {
-            Toast.makeText(this, "your device has no light sensore, so you wont be able to use the cheat funktion", Toast.LENGTH_SHORT).show();
-            //TODO stop cheat function when no sensor is avaliable
+            Toast.makeText(this, "Your device has no light sensor, so you won't be able to use the cheat function", Toast.LENGTH_SHORT).show();
+            CheatFunktion.setCheatFunction(false);
+        } else {
+            CheatFunktion.setCheatFunction(true);
         }
         maxValue = sensor.getMaximumRange();
+        CheatFunktion cheatFunktion = new CheatFunktion(GameActivity.this);
         //Log.d("Sensor", String.valueOf(maxValue));
         lightEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                float lightValue = sensorEvent.values[0];
+                player.setLightValue(sensorEvent.values[0]);
                 //float closeSensor = maxValue/100;
-                if (lightValue <= 500 && cheatButtonStatus()) {
-                    if (ChessBoard.getInstance().getwasMoveLegal()) {
-
-                        //TODO Player has to stop for one round
-                    } else {
-                        ChessBoard.getInstance().getStartPossition();
-                        //TODO move piece back to start possition
-
-                    }
-                    //Log.d("SENSOR", String.valueOf(lightValue));
-                    //TODO and person who pressedn cheat button made a move then we need to check if the move was legal
-                    //  ChessBoard.getwasMoveLegal();
+                if (sensorEvent.values[0] <= 500 && cheatButtonStatus()) {
+                    cheatFunktion.determineCheat();
                 }
             }
 
@@ -94,22 +91,21 @@ public class GameActivity extends AppCompatActivity {
             }
         };
 
-
-        Button cheatButton = getCheatButton();
-
-
         cheatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if (cheatButton.getText().toString().matches("Cheat Off")) {
                     cheatButton.setText("Cheat On");
+                    player.setCheatOn(true);
                     isCheatOn = true;
                     cheatButton.setBackgroundColor(getResources().getColor(R.color.purple_200));
 
                 } else if (cheatButton.getText().toString().matches("Cheat On")) {
                     cheatButton.setText("Cheat Off");
                     isCheatOn = false;
+                    ChessBoard.getInstance().resetLegalMoves();
+                    player.setCheatOn(false);
                     cheatButton.setBackgroundColor(getResources().getColor(R.color.black));
 
                 }
