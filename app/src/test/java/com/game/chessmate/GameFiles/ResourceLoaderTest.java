@@ -31,7 +31,7 @@ public class ResourceLoaderTest {
         resources = Mockito.mock(Resources.class);
         context = Mockito.mock(Context.class);
         screenWidth = 1200;
-        loader = new ResourceLoader(resources, screenWidth);
+        loader = new ResourceLoader(resources, screenWidth, () -> {});
     }
 
     @Test

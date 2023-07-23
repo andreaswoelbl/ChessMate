@@ -27,14 +27,18 @@ public class ResourceLoader extends AsyncTask<Void, Void, Void> {
     private static Resources resources;
     private static int fieldSize;
 
+    private final Runnable onResourcesLoaded;
+
     /**
      * Instantiates a new Resource loader.
      *
-     * @param resources   the resources
-     * @param screenWidth the screen width
+     * @param resources         the resources
+     * @param screenWidth       the screen width
+     * @param onResourcesLoaded
      */
-    public ResourceLoader(Resources resources, int screenWidth) {
+    public ResourceLoader(Resources resources, int screenWidth, Runnable onResourcesLoaded) {
         ResourceLoader.resources = resources;
+        this.onResourcesLoaded = onResourcesLoaded;
         ChessBoard board = ChessBoard.getInstance();
         fieldSize = board.calculateRectSize(screenWidth);
     }
@@ -43,6 +47,12 @@ public class ResourceLoader extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
         loadBitmapFromResources();
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void unused) {
+        super.onPostExecute(unused);
+        this.onResourcesLoaded.run();
     }
 
     /**
