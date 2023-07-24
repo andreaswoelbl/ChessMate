@@ -9,5 +9,6 @@ public class NetObjectRegistrator {
         k.register(GameStates.class);
         k.register(LobbyDataObject.class);
         k.register(PlayerDataObject.class);
+        k.register(startGameParameters.class);
     }
 }

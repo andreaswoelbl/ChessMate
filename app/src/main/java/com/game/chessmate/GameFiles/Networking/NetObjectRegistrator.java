@@ -7,6 +7,7 @@ import com.game.chessmate.GameFiles.Networking.NetObjects.PlayerDataObject;
 import com.game.chessmate.GameFiles.Networking.NetObjects.createSessionRequest;
 import com.game.chessmate.GameFiles.Networking.NetObjects.createSessionResponse;
 import com.game.chessmate.GameFiles.Networking.NetObjects.joinSessionRequest;
+import com.game.chessmate.GameFiles.Networking.NetObjects.startGameParameters;
 
 /**
  * registers the Request and Response Classes to kryonet
@@ -19,5 +20,6 @@ public class NetObjectRegistrator {
         k.register(GameStates.class);
         k.register(LobbyDataObject.class);
         k.register(PlayerDataObject.class);
+        k.register(startGameParameters.class);
     }
 }
