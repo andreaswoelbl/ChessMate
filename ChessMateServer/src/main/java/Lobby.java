@@ -1,6 +1,5 @@
-import NetObjects.GameStates;
-import NetObjects.LobbyDataObject;
-import NetObjects.PlayerDataObject;
+import NetObjects.*;
+
 import com.esotericsoftware.kryonet.Connection;
 
 import java.util.Random;
@@ -17,7 +16,7 @@ public class Lobby {
     boolean clearLobby;
     //TODO moveList
 
-    Lobby(){
+    Lobby() {
         currentLobbyState = GameStates.INITIALIZING;
         clearLobby = false;
         player1 = null;
@@ -28,48 +27,46 @@ public class Lobby {
         currentLobbyState = GameStates.WAITING_FOR_PLAYER;
     }
 
-    public String generateLobbyCode(){
+    public String generateLobbyCode() {
         Random ran = new Random(System.currentTimeMillis());
-        return Integer.toString(ran.nextInt(99999)+100000);
+        return Integer.toString(ran.nextInt(99999) + 100000);
     }
+
     // Player 1
-    public void _player1_join(Connection con, String name){
-        if(this.player1==null){
-            player1 = new PlayerObject(con, name);
+    public void _player1_join(Connection con, String name) {
+        if (this.player1 == null) {
+            player1 = new PlayerObject(con, name, ChessPieceColour.WHITE);
             playercount++;
+            updateLobby();
         }
     }
 
-    public void _player1_leave(){
-        if(player1!=null){
+    public void _player1_leave() {
+        if (player1 != null) {
             player1 = null;
             playercount--;
-            removeLobbyIfEmpty();
-        }
-    }
-    // Player 2
-    public void _player2_join(Connection con, String name){
-        if(this.player2==null){
-            player2 = new PlayerObject(con, name);
-            playercount++;
+            updateLobby();
         }
     }
 
-    public void _player2_leave(){
-        if(player2!=null){
+    // Player 2
+    public void _player2_join(Connection con, String name) {
+        if (this.player2 == null) {
+            player2 = new PlayerObject(con, name, ChessPieceColour.BLACK);
+            playercount++;
+            updateLobby();
+        }
+    }
+
+    public void _player2_leave() {
+        if (player2 != null) {
             player2 = null;
             playercount--;
-            removeLobbyIfEmpty();
+            updateLobby();
         }
     }
 
-    private void removeLobbyIfEmpty(){
-        if(playercount==0){
-            this.clearLobby = true;
-        }
-    }
-
-    public LobbyDataObject retrieveLobbyDataObject(){
+    public LobbyDataObject retrieveLobbyDataObject() {
         LobbyDataObject lobbyDataObject = new LobbyDataObject();
         lobbyDataObject.setLobbyID(this.lobbyID);
         lobbyDataObject.setLobbycode(this.lobbycode);
@@ -93,10 +90,29 @@ public class Lobby {
 
     @Override
     public String toString() {
-        return "["+lobbyID+"]<"+playercount+"> code="+lobbycode+"\n"
-                +"\t"+"state="+currentLobbyState+"\n"
-                +"\t"+"player1="+player1+"\n"
-                +"\t"+"player2="+player2+"\n"
-                +"\t"+"cheatFuncActive="+cheatFuncActive;
+        return "[" + lobbyID + "]<" + playercount + "> code=" + lobbycode + "\n"
+                + "\t" + "state=" + currentLobbyState + "\n"
+                + "\t" + "player1=" + player1 + "\n"
+                + "\t" + "player2=" + player2 + "\n"
+                + "\t" + "cheatFuncActive=" + cheatFuncActive;
+    }
+
+    public void updateLobby() {
+        if (playercount == 0) {
+            this.clearLobby = true;
+        } // removeLobbyIfEmpty
+        if (playercount == 2) {
+            currentLobbyState = GameStates.READY;
+        } // lobby can be started
+    }
+
+    public static FieldDataObject mirrorFunc(FieldDataObject field) {
+        FieldDataObject mirroredField = new FieldDataObject();
+        //TODO implement mirror function with standard ChessBoard size 8x8
+        mirroredField.setX(123);
+        mirroredField.setX(123);
+        mirroredField.getX();
+        mirroredField.getX();
+        return field;
     }
 }
