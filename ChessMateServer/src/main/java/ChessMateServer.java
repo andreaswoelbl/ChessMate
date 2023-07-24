@@ -49,26 +49,20 @@ public class ChessMateServer extends Thread {
                 if (o instanceof joinSessionRequest) {
                     System.out.println("[JOIN_SESSION_REQUEST]");
                     // Receive
-                    joinSessionRequest request = (joinSessionRequest) o;
+                    joinSessionRequest request = (joinSessionRequest)o;
                     System.out.println("Name: " + request.getName());
                     System.out.println("LobbyCode: " + request.getLobbycode());
                     // Process
                     Lobby lobby = LobbyManager.getSessionByLobbycode(request.getLobbycode());
-                    if (lobby != null) {
-                        lobby._player2_join(con, request.getName());
+                    if(lobby!=null){
+                        lobby._player2_join(con,request.getName());
                         // Send
-                        if (lobby.cheatFuncActive) {
-                            //WHEN PLAYER PROCEEDED WITH MOVE INSTEAD OF SENSORACTIVATION
-                            lobby.cheatFuncActive = false;
-                        }
-                        lobby.cheatFuncActive = request.isCheatActivated();
-                        ObjectSender.sendLobbyDataObject(con, lobby);
+                        ObjectSender.sendLobbyDataObject(con,lobby);
+                        ObjectSender.sendLobbyDataObject(lobby.player1.connection,lobby);
                     } else {
                         //TODO lobby doesn't exist
                     }
                 }
-                System.out.println(con.toString() + "\t" + o.toString() + "\n");
-            }
 
             @Override
             public void connected(Connection connection) {
