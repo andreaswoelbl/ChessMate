@@ -10,6 +10,8 @@ import com.game.chessmate.GameFiles.Networking.NetObjects.createSessionResponse;
 import com.game.chessmate.GameFiles.Networking.NetObjects.joinSessionRequest;
 import com.game.chessmate.GameFiles.Networking.NetObjects.joinSessionResponse;
 import com.game.chessmate.GameFiles.Networking.NetObjects.leaveLobbyRequest;
+import com.game.chessmate.GameFiles.Networking.NetObjects.startGameParameters;
+import com.game.chessmate.GameFiles.Networking.NetObjects.startGameRequest;
 
 import java.util.concurrent.Callable;
 
@@ -77,6 +79,37 @@ public class NetworkTasks {
             while(lobbyDataObject[0]==null){}
             ChessMateClient.getInstance().getClient().removeListener(listener);
             return lobbyDataObject[0];
+        }
+    }
+
+    public static class startGame implements Callable<startGameParameters>{
+        private final String lobbycode;
+        public startGame(String lobbycode) {
+            this.lobbycode = lobbycode;
+        }
+        @Override
+        public startGameParameters call() {
+            ChessMateClient.getInstance(); //creates and starts Client
+            startGameRequest req = new startGameRequest();
+            req.setLobbycode(this.lobbycode);
+            Log.i("NETWORK","[C]>SessionRequest: " + req.getLobbycode());
+            ChessMateClient.getInstance().getClient().sendTCP(req);
+
+            final startGameParameters[] parameters = new startGameParameters[1];
+
+            Listener listener = new Listener(){
+                public void received(Connection connection, Object object) {
+                    if (object instanceof startGameParameters) {
+                        parameters[0] = (startGameParameters) object;
+                        Log.i("NETWORK", "Received: startGameParameters");
+                    }
+                    Log.i("NETWORK",connection.toString() +"\t"+ object.toString() +"\n");
+                }
+            };
+            ChessMateClient.getInstance().getClient().addListener(listener);
+            while(parameters[0]==null){}
+            ChessMateClient.getInstance().getClient().removeListener(listener);
+            return parameters[0];
         }
     }
 
