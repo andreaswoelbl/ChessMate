@@ -64,7 +64,22 @@ public class ChessMateServer extends Thread {
                     }
                 }
 
-            @Override
+                if(o instanceof SensorActivationObject){
+                    System.out.println("[SENSOR_PACKET]");
+                    SensorActivationObject request = (SensorActivationObject)o;
+                    Lobby lobby = LobbyManager.getSessionByLobbycode(request.getLobbyCode());
+                    if(lobby!=null){
+                        if(lobby.cheatFuncActive){
+                            //ON SENSOR ACTIVATED
+                            System.out.println("Sensor got activated and other player cheated");
+                            lobby.cheatFuncActive = false;
+                        } else {
+                            System.out.println("Sensor got activated and other player did not cheat");
+                        }
+                    }
+                }
+
+                @Override
             public void connected(Connection connection) {
                 System.out.println("Connected: " + connection.toString());
             }
