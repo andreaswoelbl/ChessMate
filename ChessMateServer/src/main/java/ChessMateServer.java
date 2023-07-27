@@ -1,150 +1,251 @@
-import NetObjects.createSessionRequest;
-import NetObjects.createSessionResponse;
-import NetObjects.joinSessionRequest;
-
+import NetObjects.*;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
 import java.io.IOException;
 
-public class ChessMateServer extends Thread {
-    int TCP_PORT = 53216;//54555
+public class ChessMateServer extends Thread{
+    int TCP_PORT = 53216;
     Server serverInstance;
 
-    ChessMateServer() {
-    }
+    ChessMateServer(){}
 
     @Override
     public void run() {
         start();
     }
 
-    public void start() {
+    public void start(){
         serverInstance = new Server();
         NetObjectRegistrator.register(serverInstance.getKryo());
         try {
             serverInstance.bind(TCP_PORT);
             new Thread(serverInstance).start();
+            Log.accept("SERVER","Server started!");
         } catch (IOException e) {
-            System.err.println("[S]>Error starting server!");
+            Log.e("SERVER","Error starting server!");
         }
 
         serverInstance.addListener(new Listener() {
             @Override
-            public void received(Connection con, Object o) {
+            public void received (Connection con, Object o) {
+                if (o instanceof leaveLobbyRequest){
+                    Log.accept("LEAVE_SESSION_REQUEST","Received LEAVE REQUEST");
+                    leaveLobbyRequest req = (leaveLobbyRequest)o;
+                    Lobby lobby = LobbyManager.getSessionByLobbycode(req.getLobbycode());
+                    if(lobby!=null){
+                        if(lobby.player1!=null)
+                            if(con == lobby.player1.connection) lobby.player1Leave();
+
+                        if(lobby.player2!=null)
+                            if(con == lobby.player2.connection){
+                                lobby.player2Leave();
+                                ObjectSender.sendLobbyDataObject(lobby.player1.connection,lobby);
+                            }
+                    }
+                }
+
                 if (o instanceof createSessionRequest) {
-                    System.out.println("[CREATE_SESSION_REQUEST]");
-                    // Receive
-                    createSessionRequest request = (createSessionRequest) o;
-                    System.out.println("Request Arg: " + request.getName());
-                    // Process
+                    Log.accept("CREATE_SESSION_REQUEST","Received CREATE REQUEST");
+                    createSessionRequest request = (createSessionRequest)o;
+                    Log.i("CREATE_SESSION_REQUEST","Lobbycode: " + request.getName());
                     Lobby lobby = new Lobby();
-                    lobby._player1_join(con, request.getName());
+                    lobby.player1Join(con, request.getName());
                     LobbyManager.getSessions().add(lobby);
-                    // Send
                     ObjectSender.createLobbyResponse(con, lobby);
                 }
 
                 if (o instanceof joinSessionRequest) {
-                    System.out.println("[JOIN_SESSION_REQUEST]");
-                    // Receive
+                    Log.accept("JOIN_SESSION_REQUEST","Received JOIN REQUEST");
                     joinSessionRequest request = (joinSessionRequest)o;
                     System.out.println("Name: " + request.getName());
                     System.out.println("LobbyCode: " + request.getLobbycode());
-                    // Process
                     Lobby lobby = LobbyManager.getSessionByLobbycode(request.getLobbycode());
                     if(lobby!=null){
-                        lobby._player2_join(con,request.getName());
-                        // Send
+                        lobby.player2Join(con,request.getName());
                         ObjectSender.sendLobbyDataObject(con,lobby);
                         ObjectSender.sendLobbyDataObject(lobby.player1.connection,lobby);
                     } else {
-                        //TODO lobby doesn't exist
+                        ObjectSender.sendErrorPacket(con,"Lobby doens't exist!");
+                    }
+                }
+
+                if (o instanceof startGameRequest) {
+                    Log.accept("START_GAME_REQUEST","Received START GAME REQUEST");
+                    startGameRequest request = (startGameRequest)o;
+                    Lobby lobby = LobbyManager.getSessionByLobbycode(request.getLobbycode());
+                    if(lobby!=null){
+                        lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER1_INPUT;
+                        lobby.inGame = true;
+                        ObjectSender.sendStartGameParameters(con,lobby.player1);
+                        ObjectSender.sendStartGameParameters(lobby.player2.connection,lobby.player2);
+                    } else {
+                        ObjectSender.sendErrorPacket(con,"Error processing your gameInput!");
                     }
                 }
 
                 if(o instanceof SensorActivationObject){
-                    System.out.println("[SENSOR_PACKET]");
                     SensorActivationObject request = (SensorActivationObject)o;
                     Lobby lobby = LobbyManager.getSessionByLobbycode(request.getLobbyCode());
                     if(lobby!=null){
-                        if(lobby.cheatFuncActive){
-                            //ON SENSOR ACTIVATED
-                            if(lobby.player1.connection == con) {
-                                if (lobby.origin != null) {
-                                    FieldDataObject originField = lobby.origin;
-                                    FieldDataObject targetField = lobby.target;
-                                    GameDataObject moveBackToOrigin = new GameDataObject();
-                                    moveBackToOrigin.setOrigin(originField);
-                                    moveBackToOrigin.setTarget(targetField);
-                                    System.out.println("the player reveald your cheat");
-                                    //TODO tell player 2 that his cheat was reveald
-                                    ObjectSender.sendGameDataObject(lobby.player2.connection,lobby, moveBackToOrigin);
-                                    lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER1_MOVE;
-
+                        if(lobby.canReceiveSensorPacket){
+                            if(lobby.cheatFuncActive){
+                                Log.accept("SENSOR_PACKET","Received SENSOR PACKET");
+                                if(lobby.player1.connection == con) {
+                                    // Player 1 Revealed cheat
+                                    if (lobby.lastMoveOrigin != null) {
+                                        FieldDataObject originField = lobby.lastMoveOrigin;
+                                        FieldDataObject targetField = lobby.lastMoveTarget;
+                                        GameDataObject moveBackToOrigin = new GameDataObject();
+                                        moveBackToOrigin.setOrigin(targetField);
+                                        moveBackToOrigin.setTarget(originField);
+                                        moveBackToOrigin.setMoved(true);
+                                        /* lobby.player2.maxWrongCheatReveal--;
+                                        if (lobby.player2.maxWrongCheatReveal<=0){
+                                         GameDataObject gameDataObject = new GameDataObject();
+                                         gameDataObject.setWrongCheatRevealPlayer2(lobby.player2.maxWrongCheatReveal);
+                                         gameDataObject.setWrongCheatRevealPlayer1(lobby.player1.maxWrongCheatReveal);
+                                        }*/
+                                        Log.i("SENSOR_PACKET","Player1 revealed the cheat");
+                                        //TODO tell player 2 that his cheat was reveald
+                                        lobby.player2.maxWrongCheatReveal--;
+                                        ObjectSender.sendGameDataObjectNoFlip(lobby.player2.connection, lobby, moveBackToOrigin);
+                                        ObjectSender.sendGameDataObject(lobby.player1.connection, lobby, moveBackToOrigin);
+                                        if(lobby.player2.maxWrongCheatReveal==0){
+                                            ObjectSender.sendEndStateGameDataObject(lobby.player2.connection,false);
+                                            ObjectSender.sendEndStateGameDataObject(lobby.player1.connection,true);
+                                        }
+                                        lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER2_INPUT;
+                                    }
                                 }
-                            }
 
-                            if(lobby.player2.connection==con){
-                                if (lobby.origin != null) {
-                                    FieldDataObject originField = lobby.origin;
-                                    FieldDataObject targetField = lobby.target;
-                                    GameDataObject moveBackToOrigin = new GameDataObject();
-                                    moveBackToOrigin.setOrigin(originField);
-                                    moveBackToOrigin.setTarget(targetField);
-                                    System.out.println("the player reveald your cheat");
-                                    //TODO tell player 1 that his cheat was reveald
-                                    ObjectSender.sendGameDataObject(lobby.player1.connection,lobby, moveBackToOrigin);
-                                    lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER1_MOVE;
+                                if(lobby.player2.connection==con) {
+                                    if (lobby.lastMoveOrigin != null) {
+                                        FieldDataObject originField = lobby.lastMoveOrigin;
+                                        FieldDataObject targetField = lobby.lastMoveTarget;
+                                        GameDataObject moveBackToOrigin = new GameDataObject();
+                                        moveBackToOrigin.setOrigin(targetField);
+                                        moveBackToOrigin.setTarget(originField);
+                                        moveBackToOrigin.setMoved(true);
+                                        /*lobby.player1.maxWrongCheatReveal--;
+                                         if (lobby.player1.maxWrongCheatReveal<=0){
+                                             GameDataObject gameDataObject = new GameDataObject();
 
+                                             ObjectSender.sendEndStateGameDataObject(con, gameDataObject,true);
+                                             ObjectSender.sendEndStateGameDataObject(lobby.player1.connection, gameDataObject,false);
+                                         }*/
+
+                                        Log.i("SENSOR_PACKET", "Player2 revealed the cheat");
+                                        //TODO tell player 1 that his cheat was reveald
+                                        lobby.player1.maxWrongCheatReveal--;
+                                        ObjectSender.sendGameDataObjectNoFlip(lobby.player1.connection, lobby, moveBackToOrigin);
+                                        ObjectSender.sendGameDataObject(lobby.player2.connection, lobby, moveBackToOrigin);
+
+                                        if(lobby.player1.maxWrongCheatReveal==0){
+                                            ObjectSender.sendEndStateGameDataObject(lobby.player1.connection,false);
+                                            ObjectSender.sendEndStateGameDataObject(lobby.player2.connection,true);
+                                        }
+                                        lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER1_INPUT;
+                                    }
                                 }
-
-
-                                //ON SENSOR ACTIVATED BUT PLAYER DID NOT CHEAT
-                                System.out.println("Sensor got activated and other player cheated");
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                Log.v("SENSOR_PACKET","Sensor got activated and other player cheated");
                                 lobby.cheatFuncActive = false;
+                                lobby.canReceiveSensorPacket = false;
                             } else {
-                                System.out.println("Sensor got activated and other player did not cheat");
+                                Log.v("SENSOR_PACKET","Sensor got activated and other player did not cheat");
                                 if(lobby.player1.connection == con) {
                                     if (lobby.player1.maxWrongCheatReveal > 0) {
                                         lobby.player1.maxWrongCheatReveal--;
-                                        lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER2_MOVE;
-
+                                        if(lobby.player1.maxWrongCheatReveal==0){
+                                            ObjectSender.sendEndStateGameDataObject(lobby.player1.connection,false);
+                                            ObjectSender.sendEndStateGameDataObject(lobby.player2.connection,true);
+                                        }
+                                        lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER1_INPUT;
                                         // ObjectSender.sendGameDataObject(lobby.player2.connection, lobby, request);
-
                                     } else {
-                                        System.out.println("You wrongly accused the other player of cheating more than 3 times");
+                                        Log.i("SENSOR_PACKET","Player1 ran out of reveals!");
                                         //TODO anzeigen wieviele Aufdeckversuche noch vorhanden sind
                                         // lobby.currentLobbyState = GameStates.GAMEOVER;
                                     }
                                 }
-                            }
-                            if(lobby.player2.connection == con){
-                                if(lobby.player2.maxWrongCheatReveal > 0){
-                                    lobby.player2.maxWrongCheatReveal--;
-                                    lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER1_MOVE;
 
+                                if(lobby.player2.connection == con){
+                                    if(lobby.player2.maxWrongCheatReveal > 0){
+                                        lobby.player2.maxWrongCheatReveal--;
+                                        if(lobby.player2.maxWrongCheatReveal==0){
+                                            ObjectSender.sendEndStateGameDataObject(lobby.player2.connection,false);
+                                            ObjectSender.sendEndStateGameDataObject(lobby.player1.connection,true);
+                                        }
+                                        lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER2_INPUT;
+                                    } else {
+                                        Log.i("SENSOR_PACKET", "Player2 ran out of reveals!");
+                                        //TODO anzeigen wieviele Aufdeckversuche noch vorhanden sind
+                                        // lobby.currentLobbyState = GameStates.GAMEOVER;
+                                    }
                                 }
-                            } else {
-                                System.out.println("You wrongly accused the other player of cheating more than 3 times");
-                                //TODO anzeigen wieviele Aufdeckversuche noch vorhanden sind
-                                // lobby.currentLobbyState = GameStates.GAMEOVER;
+                                lobby.canReceiveSensorPacket = false;
                             }
-
-
                         }
                     }
                 }
 
-                @Override
+                if (o instanceof GameDataObject) {
+                    Log.accept("GAME_DATA_OBJECT","Received Game Data");
+                    GameDataObject request = (GameDataObject)o;
+                    Lobby lobby = LobbyManager.getSessionByLobbycode(request.getLobbyCode());
+                    if(lobby!=null){
+                        if(lobby.cheatFuncActive){
+                            //WHEN PLAYER PROCEEDED WITH MOVE INSTEAD OF SENSORACTIVATION
+                            lobby.canReceiveSensorPacket = false;
+                            lobby.cheatFuncActive = false;
+                        }
+                        lobby.lastMoveOrigin = request.getOrigin();
+                        lobby.lastMoveTarget = request.getTarget();
+                        lobby.cheatFuncActive = request.isCheatActivated();
+                        Log.i("GameDataObject",request.getOrigin().toString());
+                        Log.i("GameDataObject",request.getTarget().toString());
+                        Log.i("GameDataObject", "MovedBackVar: "+request.isMovedBack());
+                        if(lobby.currentLobbyState == GameStates.WAITING_FOR_PLAYER1_INPUT){
+                            System.out.println("Current Lobbystate was WaitForPlayer1move");
+                            if(con==lobby.player1.connection){
+                                System.out.println("Connection was the same with player 1");
+                                System.out.println(lobby.player1);
+                                lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER2_INPUT;
+                                ObjectSender.sendGameDataObject(lobby.player2.connection, lobby, request);
+                            }
+                        }
+                        if(lobby.currentLobbyState == GameStates.WAITING_FOR_PLAYER2_INPUT){
+                            System.out.println("Current Lobbystate was WaitForPlayer2move");
+                            if(con==lobby.player2.connection){
+                                System.out.println("Connection was the same with player 2");
+                                System.out.println(lobby.player2);
+                                lobby.currentLobbyState = GameStates.WAITING_FOR_PLAYER1_INPUT;
+                                ObjectSender.sendGameDataObject(lobby.player1.connection, lobby, request);
+                            }
+                        }
+                        lobby.canReceiveSensorPacket = true;
+                    } else {
+                        ObjectSender.sendErrorPacket(con,"Error processing your gameInput!");
+                    }
+                }
+                //Log.v("SERVER",con.toString() +"\t"+ o.toString() +"\n");
+            }
+
+            @Override
             public void connected(Connection connection) {
-                System.out.println("Connected: " + connection.toString());
+                Log.i("SERVER",connection.toString()+" joined");
             }
 
             @Override
             public void disconnected(Connection connection) {
-                System.out.println("Disconnected: " + connection.toString());
+                Log.i("SERVER",connection.toString()+" left");
+                System.out.println("Disconnected: " +connection.toString());
             }
         });
     }

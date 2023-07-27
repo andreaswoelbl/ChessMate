@@ -1,18 +1,23 @@
+import NetObjects.ChessPieceColour;
 import com.esotericsoftware.kryonet.Connection;
 
 public class PlayerObject {
     String name;
     Connection connection;
-    boolean color;
+    ChessPieceColour chessPieceColour;
+    int maxWrongCheatReveal;
 
-    public PlayerObject(Connection connection, String name){
+    public PlayerObject(Connection connection, String name,ChessPieceColour colour){
         this.connection = connection;
         this.name = name;
+        this.chessPieceColour = colour;
+        this.maxWrongCheatReveal = 3;
+
     }
 
     @Override
     public String toString() {
-        return "["+name+"]<"+connection+"> Color:"+color;
+        return "["+name+"]<"+connection+"> Color:"+chessPieceColour;
     }
 
 
@@ -32,11 +37,19 @@ public class PlayerObject {
         this.connection = connection;
     }
 
-    public boolean isColor() {
-        return color;
+    public ChessPieceColour getChessPieceColour() {
+        return chessPieceColour;
     }
 
-    public void setColor(boolean color) {
-        this.color = color;
+    public void setChessPieceColour(ChessPieceColour chessPieceColour) {
+        this.chessPieceColour = chessPieceColour;
+    }
+
+    public int getMaxWrongCheatReveal() {
+        return maxWrongCheatReveal;
+    }
+
+    public void setMaxWrongCheatReveal(int maxWrongCheatReveal) {
+        this.maxWrongCheatReveal = maxWrongCheatReveal;
     }
 }

@@ -67,6 +67,7 @@ public class LobbyManager {
             if(s.lobbyID==lobbyID) return s;
         return null;
     }
+
     public static void deleteLobby(Lobby lobby){
         if(lobby!=null){
             if(lobby.player2!=null) ObjectSender.sendBackToCodeScreen(lobby.player2.connection);
