@@ -6,6 +6,9 @@ public class PlayerObject {
     String name;
     Connection connection;
     boolean color;
+    //boolean cheatOn;
+
+
 
     public PlayerObject(Connection connection, String name){
         this.connection = connection;

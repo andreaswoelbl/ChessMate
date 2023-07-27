@@ -2,9 +2,7 @@ package com.game.chessmate.GameFiles.Networking.NetObjects;
 
 public class startGameRequest {
     String lobbycode;
-
-    public startGameRequest() {
-    }
+    public startGameRequest(){}
 
     public String getLobbycode() {
         return lobbycode;

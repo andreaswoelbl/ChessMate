@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.game.chessmate.GameFiles.Networking.NetObjects.LobbyDataObject;
 import com.game.chessmate.GameFiles.Networking.NetObjects.createSessionResponse;
 
 public class ClientListener extends Listener {
@@ -21,13 +22,6 @@ public class ClientListener extends Listener {
     @Override
     public void received(Connection connection, Object object) {
         super.received(connection, object);
-        /*if(object instanceof createSessionResponse){
-            lobbycode = null;
-            createSessionResponse req = (createSessionResponse) object;
-            Log.i("NETWORK", "[T:" + Thread.currentThread().getName() + "] " + "[C]>SessionResponse: " + req.getLobbyCode());
-            lobbycode = req.getLobbyCode();
-        }*/
-
     }
 
     public static String getLobbycode() {

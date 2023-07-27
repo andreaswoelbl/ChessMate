@@ -1,18 +1,29 @@
 package com.game.chessmate.GameFiles.Networking;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.esotericsoftware.kryonet.Client;
+import com.game.chessmate.CreateSession;
 
 import java.io.IOException;
 
 /** The ChessMateClient class implements a Client that allows players to connect to a Server. */
 public class ChessMateClient extends Thread {
+    private static boolean loggedIn = false;
+    private static ChessMateClient tempChessMateClient;
     // Thread-Save Singleton
     private static final class InstanceHolder {
-        static final ChessMateClient INSTANCE = new ChessMateClient();
+        static final ChessMateClient INSTANCE = tempChessMateClient;
     }
-    public static ChessMateClient getInstance(){ return ChessMateClient.InstanceHolder.INSTANCE; }
+    public static ChessMateClient getInstance(){
+        if(loggedIn){
+            return ChessMateClient.InstanceHolder.INSTANCE;
+        } else {
+            tempChessMateClient = new ChessMateClient();
+            return tempChessMateClient;
+        }
+    }
 
     // Local Variables
     static Client clientInstance;
@@ -21,12 +32,14 @@ public class ChessMateClient extends Thread {
     private Object response;
     private static ClientListener clientListener;
 
-    ChessMateClient(){
-        this.start();
-    }
+    ChessMateClient(){ this.start(); }
 
     @Override
     public void run() {
+        init();
+    }
+
+    private static void init(){
         try {
             clientInstance = new Client();
             NetObjectRegistrator.register(clientInstance.getKryo());
@@ -37,30 +50,12 @@ public class ChessMateClient extends Thread {
             clientInstance.addListener(clientListener);
             Log.i("NETWORK", "Client started!");
             //clientInstance.addListener(new ChessMateClient());
+            loggedIn = true;
+            ChessMateClient.getInstance();
         } catch (IOException e) {
             Log.e("NETWORK", "[C]>Error no server found!");
         }
     }
-    /*public void createSession(Object o){
-        if(o instanceof createSessionRequest){
-            createSessionRequest req = (createSessionRequest) o;
-            Log.i("NETWORK","[C]>SessionRequest: " + req.getName());
-            clientInstance.sendTCP(req);
-        }
-    }*/
-
-    /*public Object receive() {
-        clientInstance.addListener(new Listener(){
-            public void received(Connection connection, Object object) {
-                if(object instanceof createSessionResponse){
-                    createSessionResponse req = (createSessionResponse) object;
-                    Log.i("NETWORK","[T:"+Thread.currentThread().getName()+"] "+"[C]>SessionResponse: " + req.getLobbyCode());
-                    response = req.getLobbyCode();
-                }
-            }
-        });
-        return response;
-    }*/
 
     public String getLobbyCode(){ return (String) this.response;}
 

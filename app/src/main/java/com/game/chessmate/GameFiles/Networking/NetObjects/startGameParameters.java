@@ -5,8 +5,7 @@ import com.game.chessmate.GameFiles.PlayingPieces.ChessPieceColour;
 public class startGameParameters {
     ChessPieceColour initColour;
 
-    public startGameParameters() {
-    }
+    public startGameParameters() {}
 
     public ChessPieceColour getInitColour() {
         return initColour;

@@ -4,7 +4,12 @@ import android.util.Log;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.game.chessmate.GameFiles.Field;
+import com.game.chessmate.GameFiles.Networking.NetObjects.ErrorPacket;
+import com.game.chessmate.GameFiles.Networking.NetObjects.FieldDataObject;
+import com.game.chessmate.GameFiles.Networking.NetObjects.GameDataObject;
 import com.game.chessmate.GameFiles.Networking.NetObjects.LobbyDataObject;
+import com.game.chessmate.GameFiles.Networking.NetObjects.SensorActivationObject;
 import com.game.chessmate.GameFiles.Networking.NetObjects.createSessionRequest;
 import com.game.chessmate.GameFiles.Networking.NetObjects.createSessionResponse;
 import com.game.chessmate.GameFiles.Networking.NetObjects.joinSessionRequest;
@@ -13,6 +18,7 @@ import com.game.chessmate.GameFiles.Networking.NetObjects.leaveLobbyRequest;
 import com.game.chessmate.GameFiles.Networking.NetObjects.startGameParameters;
 import com.game.chessmate.GameFiles.Networking.NetObjects.startGameRequest;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
 public class NetworkTasks {
@@ -22,15 +28,10 @@ public class NetworkTasks {
             this.name = name;
         }
         @Override
-        public String call() {
+        public String call(){
             ChessMateClient.getInstance(); //creates and starts Client
-            createSessionRequest req = new createSessionRequest();
-            req.setName(this.name);
-            Log.i("NETWORK","[C]>SessionRequest: " + req.getName());
-            ChessMateClient.getInstance().getClient().sendTCP(req);
-
             final String[] lobbycode = new String[1];
-
+            lobbycode[0]=null;
             Listener listener = new Listener(){
                 public void received(Connection connection, Object object) {
                     if (object instanceof createSessionResponse) {
@@ -42,7 +43,18 @@ public class NetworkTasks {
                 }
             };
             ChessMateClient.getInstance().getClient().addListener(listener);
-            while(lobbycode[0]==null){}
+            createSessionRequest req = new createSessionRequest();
+            req.setName(this.name);
+            Log.i("NETWORK","[C]>SessionRequest: " + req.getName());
+            ChessMateClient.getInstance().getClient().sendTCP(req);
+            int errorTimeout=0;
+            while(lobbycode[0]==null){
+                Log.d("NETWORK", "Lobbycode" + lobbycode[0]);
+                if(errorTimeout>5000){
+                    lobbycode[0]="";
+                }
+                errorTimeout++;
+            }
             ChessMateClient.getInstance().getClient().removeListener(listener);
             return lobbycode[0];
         }
@@ -58,25 +70,42 @@ public class NetworkTasks {
         @Override
         public LobbyDataObject call() {
             ChessMateClient.getInstance(); //creates and starts Client
+            final LobbyDataObject[] lobbyDataObject = new LobbyDataObject[1];
+            lobbyDataObject[0]=null;
+            Listener listener = new Listener(){
+                public void received(Connection connection, Object object) {
+                    if (object instanceof LobbyDataObject) {
+                        lobbyDataObject[0] = (LobbyDataObject) object;
+                        Log.i("NETWORK", Thread.currentThread().getName()+"Received: lobbyDataObject");
+                    }
+
+                    if(object instanceof ErrorPacket){
+                        ErrorPacket errorPacket = (ErrorPacket) object;
+                        LobbyDataObject tempObject = new LobbyDataObject();
+                        tempObject.setClearLobby(true);
+                        tempObject.setLobbycode(errorPacket.getErrorMsg());
+                        lobbyDataObject[0] = tempObject;
+                        Log.i("NETWORK", Thread.currentThread().getName()+"Received: ErrorPacket");
+                    }
+                }
+            };
+            ChessMateClient.getInstance().getClient().addListener(listener);
             joinSessionRequest req = new joinSessionRequest();
             req.setLobbycode(this.lobbycode);
             req.setName(this.name);
             Log.i("NETWORK","[C]>SessionRequest: " + req.getLobbycode());
             ChessMateClient.getInstance().getClient().sendTCP(req);
-
-            final LobbyDataObject[] lobbyDataObject = new LobbyDataObject[1];
-
-            Listener listener = new Listener(){
-                public void received(Connection connection, Object object) {
-                    if (object instanceof LobbyDataObject) {
-                        lobbyDataObject[0] = (LobbyDataObject) object;
-                        Log.i("NETWORK", "Received: lobbyDataObject");
-                    }
-                    Log.i("NETWORK",connection.toString() +"\t"+ object.toString() +"\n");
+            int errorTimeout=0;
+            while(lobbyDataObject[0]==null){
+                Log.d("NETWORK", String.valueOf(lobbyDataObject[0]));
+                if(errorTimeout>5000){
+                    LobbyDataObject tempObject = new LobbyDataObject();
+                    tempObject.setClearLobby(true);
+                    tempObject.setLobbycode("No server available!");
+                    lobbyDataObject[0] = tempObject;
                 }
-            };
-            ChessMateClient.getInstance().getClient().addListener(listener);
-            while(lobbyDataObject[0]==null){}
+                errorTimeout++;
+            }
             ChessMateClient.getInstance().getClient().removeListener(listener);
             return lobbyDataObject[0];
         }
@@ -107,20 +136,92 @@ public class NetworkTasks {
                 }
             };
             ChessMateClient.getInstance().getClient().addListener(listener);
-            while(parameters[0]==null){}
+            int errorTimeout=0;
+            while(parameters[0]==null){
+                Log.d("NETWORK", "parameters" + parameters[0]);
+                if(errorTimeout>5000){
+                    startGameParameters tempObject = new startGameParameters();
+                    tempObject.setInitColour(null);
+                    parameters[0] = tempObject;
+                }
+                errorTimeout++;
+            }
             ChessMateClient.getInstance().getClient().removeListener(listener);
             return parameters[0];
         }
     }
 
-    /*public static void leaveSession() {
-        ChessMateClient.getInstance(); //creates and starts Client
-        leaveLobbyRequest req = new leaveLobbyRequest();
-        ChessMateClient.getInstance().getClient().sendTCP(req);
+    public static class SendSensorPacket extends Thread{
+        public SendSensorPacket() {
+            this.start();
+        }
+        @Override
+        public void run() {
+            SensorActivationObject sensorActivationObject = new SensorActivationObject();
+            sensorActivationObject.setLobbyCode(NetworkManager.currentLobbyCode);
+            ChessMateClient.getInstance().getClient().sendTCP(sensorActivationObject);
+        }
     }
 
-                String lobbycode = null;
-            while(lobbycode==null){ClientListener.getLobbycode();}
-            return lobbycode;
-    */
+    public static class SendLeaveSessionPacket extends Thread{
+        public SendLeaveSessionPacket() {
+            this.start();
+        }
+        @Override
+        public void run() {
+            leaveLobbyRequest leaveLobbyRequest = new leaveLobbyRequest();
+            leaveLobbyRequest.setLobbycode(NetworkManager.currentLobbyCode);
+            ChessMateClient.getInstance().getClient().sendTCP(leaveLobbyRequest);
+        }
+    }
+
+    public static class SendWin extends Thread{
+        public SendWin(){
+            this.start();
+        }
+        @Override
+        public void run(){
+            FieldDataObject itsATrap = new FieldDataObject();
+            itsATrap.setX(1);
+            itsATrap.setY(1);
+            GameDataObject object = new GameDataObject();
+            object.setOrigin(itsATrap);
+            object.setTarget(itsATrap);
+            object.setWin(true);
+            object.setLobbyCode(NetworkManager.currentLobbyCode);
+            ChessMateClient.getInstance().getClient().sendTCP(object);
+        }
+    }
+
+    public static class SendCard extends Thread {
+        int id;
+        Field field1;
+        Field field2;
+
+        public SendCard(int id, Field field1, Field field2) {
+            this.id=id;
+            this.field1=field1;
+            this.field2=field2;
+            this.start();
+        }
+
+        @Override
+        public void run() {
+            FieldDataObject tempField1 = new FieldDataObject();
+            tempField1.setX(field1.getFieldX());
+            tempField1.setY(field1.getFieldY());
+
+            FieldDataObject tempField2=new FieldDataObject();
+            tempField2.setX(field2.getFieldX());
+            tempField2.setY(field2.getFieldY());
+
+            GameDataObject object = new GameDataObject();
+            object.setCardId(id);
+            object.setOrigin(tempField1);
+            object.setTarget(tempField2);
+            object.setUsedCard(true);
+            object.setLobbyCode(NetworkManager.currentLobbyCode);
+            ChessMateClient.getInstance().getClient().sendTCP(object);
+        }
+    }
 }
