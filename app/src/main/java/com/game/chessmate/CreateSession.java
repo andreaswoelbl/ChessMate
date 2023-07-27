@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -30,15 +31,20 @@ public class CreateSession extends AppCompatActivity {
         TextView namedisplay = findViewById(R.id.playerName);
         String name = getIntent().getExtras().getString("name");
 
-        namedisplay.setText("Welcome " + name);
-
+        namedisplay.setText("Welcome "+ name);
+        final String[] lobbycode = new String[1];
         createSession.setOnClickListener(v -> {
-            String lobbycode = NetworkManager.createSession(name);
-            if (lobbycode != null) {
-                Intent toLobbyIntent = new Intent(this, Lobby.class);
-                toLobbyIntent.putExtra("playername1", name);
-                toLobbyIntent.putExtra("lobbycode", lobbycode);
-                startActivity(toLobbyIntent);
+            lobbycode[0] = NetworkManager.createSession(name);
+            if(lobbycode[0]!=null){
+                if(lobbycode[0].length()>0){
+                    Intent toLobbyIntent = new Intent(this, Lobby.class);
+                    toLobbyIntent.putExtra("playername1",name);
+                    toLobbyIntent.putExtra("lobbycode",lobbycode[0]);
+                    startActivity(toLobbyIntent);
+                } else {
+                    Toast.makeText(this, "No server available!", Toast.LENGTH_LONG).show();
+
+                }
             }
         });
 
