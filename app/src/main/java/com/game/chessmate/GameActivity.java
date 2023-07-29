@@ -6,55 +6,45 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.game.chessmate.GameFiles.CheatFunktion;
 import com.game.chessmate.GameFiles.ChessBoard;
-import com.game.chessmate.GameFiles.Deck;
+import com.game.chessmate.GameFiles.GameState;
 import com.game.chessmate.GameFiles.Player;
 
 /**
  * The type Game activity.
  */
 public class GameActivity extends AppCompatActivity {
+
     /**
-     * The Card 1.
-     */
-    ImageView card1, /**
-     * The Card 2.
-     */
-    card2, /**
-     * The Card 3.
-     */
-    card3, /**
      * The Exact view.
      */
-    exactView;
+    ImageView exactView;
     /**
      * The Button.
      */
     Button button;
-    /**
-     * The Deck.
-     */
-    Deck deck;
+
     /**
      * The Id.
      */
     int id = 0;
-
 
     private Sensor sensor;
     private SensorManager sensorManager;
     private SensorEventListener lightEventListener;
     private float maxValue;
 
-
+    private Player player;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +54,7 @@ public class GameActivity extends AppCompatActivity {
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         Button cheatButton = getCheatButton();
-        Player player = ChessBoard.getInstance().getLocalPlayer();
+        player = ChessBoard.getInstance().getLocalPlayer();
 
         if (sensor == null) {
             Toast.makeText(this, "Your device has no light sensor, so you won't be able to use the cheat function", Toast.LENGTH_SHORT).show();
@@ -112,13 +102,6 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        //init deck of cards
-        deck = new Deck();
-
-        card1 = (ImageView) findViewById(R.id.cardView1);
-        card2 = (ImageView) findViewById(R.id.cardView2);
-        card3 = (ImageView) findViewById(R.id.cardView3);
-        exactView = (ImageView) findViewById(R.id.exactView);
         button = (Button) findViewById(R.id.back);
 
 
@@ -126,61 +109,40 @@ public class GameActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 exactView.setVisibility(View.GONE);
-                switch (id) {
-                    case 1:
-                        card1.setVisibility(View.VISIBLE);
-                        break;
-                    case 2:
-                        card2.setVisibility(View.VISIBLE);
-                        break;
-                    case 3:
-                        card3.setVisibility(View.VISIBLE);
-                        break;
-                }
                 id = 0;
-            }
-        });
-
-
-        //click on first card
-        card1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                exactView.setImageResource(deck.cardsPlayer1[0].getDrawableId());
-                exactView.setVisibility(View.VISIBLE);
-                card1.setVisibility(View.INVISIBLE);
-                button.setVisibility(View.VISIBLE);
-                id = 1;
-            }
-        });
-
-        //click on second card
-        card2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                exactView.setImageResource(deck.cardsPlayer1[1].getDrawableId());
-                exactView.setVisibility(View.VISIBLE);
-                card2.setVisibility(View.INVISIBLE);
-                button.setVisibility(View.VISIBLE);
-                id = 2;
-            }
-        });
-
-        //click on third card
-        card3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                exactView.setImageResource(deck.cardsPlayer1[2].getDrawableId());
-                exactView.setVisibility(View.VISIBLE);
-                card3.setVisibility(View.INVISIBLE);
-                button.setVisibility(View.VISIBLE);
-                id = 3;
             }
         });
     }
 
+    /**
+     * Sets game state view.
+     *
+     * @param gameState the game state
+     */
+    public void setGameStateView(GameState gameState) {
+        TextView gameStateView = findViewById(R.id.gameStateView);
+        if (gameStateView != null) {
+            Log.i("TAG", "setGameStateView: " + gameStateView);
+            switch (gameState) {
+                case ACTIVE:
+                    gameStateView.setText("Your Turn !");
+                    break;
+                case WAITING:
+                    gameStateView.setText("Waiting for enemy...");
+                    break;
+                case WIN:
+                    gameStateView.setText("You Won !");
+                    break;
+                case LOOSE:
+                    gameStateView.setText("You Lost");
+                    break;
+                default:
+                    gameStateView.setText("...");
+                    break;
+            }
+        }
+    }
 
     @Override
     public void onPause() {
@@ -203,6 +165,17 @@ public class GameActivity extends AppCompatActivity {
     public Button getCheatButton() {
         Button cheatButton = findViewById(R.id.cheatButton);
         return cheatButton;
+    }
+
+    public void updateButtonTextLocal(){
+        /**
+         * The Cheat button.
+         */
+        Button cheatButton = findViewById(R.id.cheatButton);
+        if (cheatButton != null) {
+            if(isCheatOn) cheatButton.setText("Cheat ON " + player.getTimesCheatFunktionUsedWrongly() + " left");
+            if(!isCheatOn) cheatButton.setText("Cheat OFF " + player.getTimesCheatFunktionUsedWrongly() + " left");
+        }
     }
 
     private static boolean isCheatOn = false;

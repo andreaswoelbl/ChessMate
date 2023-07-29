@@ -2,8 +2,6 @@ package com.game.chessmate;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,7 +55,7 @@ public class CreateSession extends AppCompatActivity {
         });
 
         rulesButton.setOnClickListener(view -> {
-            Intent ruleIntent = new Intent(this, RuleActivity.class);
+            Intent ruleIntent = new Intent(this, RulesActivity.class);
             startActivity(ruleIntent);
         });
 

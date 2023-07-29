@@ -13,12 +13,10 @@ import com.game.chessmate.GameFiles.Networking.NetObjects.SensorActivationObject
 import com.game.chessmate.GameFiles.Networking.NetObjects.createSessionRequest;
 import com.game.chessmate.GameFiles.Networking.NetObjects.createSessionResponse;
 import com.game.chessmate.GameFiles.Networking.NetObjects.joinSessionRequest;
-import com.game.chessmate.GameFiles.Networking.NetObjects.joinSessionResponse;
 import com.game.chessmate.GameFiles.Networking.NetObjects.leaveLobbyRequest;
 import com.game.chessmate.GameFiles.Networking.NetObjects.startGameParameters;
 import com.game.chessmate.GameFiles.Networking.NetObjects.startGameRequest;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 public class NetworkTasks {
@@ -188,38 +186,6 @@ public class NetworkTasks {
             object.setOrigin(itsATrap);
             object.setTarget(itsATrap);
             object.setWin(true);
-            object.setLobbyCode(NetworkManager.currentLobbyCode);
-            ChessMateClient.getInstance().getClient().sendTCP(object);
-        }
-    }
-
-    public static class SendCard extends Thread {
-        int id;
-        Field field1;
-        Field field2;
-
-        public SendCard(int id, Field field1, Field field2) {
-            this.id=id;
-            this.field1=field1;
-            this.field2=field2;
-            this.start();
-        }
-
-        @Override
-        public void run() {
-            FieldDataObject tempField1 = new FieldDataObject();
-            tempField1.setX(field1.getFieldX());
-            tempField1.setY(field1.getFieldY());
-
-            FieldDataObject tempField2=new FieldDataObject();
-            tempField2.setX(field2.getFieldX());
-            tempField2.setY(field2.getFieldY());
-
-            GameDataObject object = new GameDataObject();
-            object.setCardId(id);
-            object.setOrigin(tempField1);
-            object.setTarget(tempField2);
-            object.setUsedCard(true);
             object.setLobbyCode(NetworkManager.currentLobbyCode);
             ChessMateClient.getInstance().getClient().sendTCP(object);
         }

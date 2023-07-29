@@ -57,9 +57,9 @@ abstract public class ChessPiece extends View {
     private boolean isCaptured = false;
     private ChessBoard board;
     protected boolean opponentEncountered = false;
-    private boolean isChampion=false;
-    private boolean isSwapped=false;
-    private ChessPiece swapPiece=null;
+    private boolean isChampion = false;
+    private boolean isSwapped = false;
+    private ChessPiece swapPiece = null;
     private MediaPlayer moveSound_start;
     private MediaPlayer moveSound_end;
     private Context context;
@@ -83,9 +83,9 @@ abstract public class ChessPiece extends View {
         this.updateMovementOffset = false;
         this.updateView = false;
         this.sprite = sprite;
-        this.moveSound_end = MediaPlayer.create(context,R.raw.chessmatemove_end);
-        this.moveSound_start.setVolume(1.0f,1.0f);
-        this.moveSound_end.setVolume(1.0f,1.0f);
+        this.moveSound_end = MediaPlayer.create(context, R.raw.chessmatemove_end);
+        this.moveSound_start.setVolume(1.0f, 1.0f);
+        this.moveSound_end.setVolume(1.0f, 1.0f);
     }
 
     /**
@@ -107,7 +107,7 @@ abstract public class ChessPiece extends View {
         this.updateMovementOffset = false;
         this.updateView = false;
         this.sprite = sprite;
-        this.moveSound_end = MediaPlayer.create(context,R.raw.chessmatemove_end);
+        this.moveSound_end = MediaPlayer.create(context, R.raw.chessmatemove_end);
     }
 
     /**
@@ -142,15 +142,15 @@ abstract public class ChessPiece extends View {
         }
     }
 
-    private void startPlayingMoveSound(){
+    private void startPlayingMoveSound() {
         board = ChessBoard.getInstance();
-        if (!board.isSoundOn()){
+        if (!board.isSoundOn()) {
             return;
         }
         try {
             moveSound_start = MediaPlayer.create(this.context, R.raw.chessmatemove_start);
             moveSound_start.start();
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -163,24 +163,23 @@ abstract public class ChessPiece extends View {
     public void move(Field targetField) {
         startPlayingMoveSound();
 
-        Field [][] currentFields=ChessBoard.getInstance().getBoardFields();
+        Field[][] currentFields = ChessBoard.getInstance().getBoardFields();
 
-        if (this.isChampion){
+        if (this.isChampion) {
             this.getPosition().setRectangleDefaultColor();
             this.getPosition().invalidate();
         }
 
-        if (targetField.hasPiece()&&targetField.getCurrentPiece().isProtected==false) {
+        if (targetField.hasPiece() && targetField.getCurrentPiece().isProtected == false) {
             if (targetField.getCurrentPiece().getColour() != this.colour) {
                 targetField.getCurrentPiece().capture();
             }
-        }
-        else if(targetField.hasPiece()&&targetField.getCurrentPiece().isProtected==true) {
+        } else if (targetField.hasPiece() && targetField.getCurrentPiece().isProtected == true) {
             targetField.getCurrentPiece().setProtected(false);
         }
 
-        for (int i=0;i<8;i++){
-            for (int j=0;j<8;j++){
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 if (currentFields[i][j].isProtected()) {
                     currentFields[i][j].setRectangleDefaultColor();
                     currentFields[i][j].setProtected(false);
@@ -210,8 +209,7 @@ abstract public class ChessPiece extends View {
         if ((offset.getX() != vector.getX()) || (offset.getY() != vector.getY())) {
             offset = offset.add(vector.div(this.movementSpeed));
             this.setUpdateView(true);
-        }
-        else if(!isSwapped){
+        } else if (!isSwapped) {
             afterMove();
         }
     }
@@ -222,19 +220,11 @@ abstract public class ChessPiece extends View {
     private void afterMove() {
         stopMoveSoundPlayEndSound();
 
-        if (ChessBoard.getInstance().isCardActivated()){
-            Log.i("GAMESTATE", "afterCardstart: " + ChessBoard.getInstance().getGameState());
-            if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
-                NetworkManager.sendCard(ChessBoard.getInstance().getCurrentCard().getId(),currentPosition, targetPosition);
-            }
+        Log.i("GAMESTATE", "afterMovestart: " + ChessBoard.getInstance().getGameState());
+        if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
+            NetworkManager.sendMove(currentPosition, targetPosition);
         }
 
-        else {
-            Log.i("GAMESTATE", "afterMovestart: " + ChessBoard.getInstance().getGameState());
-            if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
-                NetworkManager.sendMove(currentPosition, targetPosition);
-            }
-        }
         this.updateMovementOffset = false;
         this.offset = new Vector(0, 0);
         currentPosition.setCurrentPiece(null);
@@ -242,10 +232,10 @@ abstract public class ChessPiece extends View {
         targetPosition.setCurrentPiece(this);
 
         //swap-Move (card)
-        swapPiece=null;
-        isSwapped=false;
+        swapPiece = null;
+        isSwapped = false;
 
-        if (this.isChampion()){
+        if (this.isChampion()) {
             targetPosition.markChampion();
             targetPosition.invalidate();
         }
@@ -254,32 +244,25 @@ abstract public class ChessPiece extends View {
 
         if (ChessBoard.getInstance().getGameState() == GameState.WAITING) {
             ChessBoard.getInstance().setGameState(GameState.ACTIVE);
-        }
-        else if(ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
+        } else if (ChessBoard.getInstance().getGameState() == GameState.ACTIVE) {
             ChessBoard.getInstance().setGameState(GameState.WAITING);
         }
 
 
-        Log.i("GAMESTATE","afterMoveend: " + ChessBoard.getInstance().getGameState());
+        Log.i("GAMESTATE", "afterMoveend: " + ChessBoard.getInstance().getGameState());
 
-        if (ChessBoard.getInstance().isCardActivated()){
-            Log.i("GAMESTATE", "afterCardend: " + ChessBoard.getInstance().getGameState());
-            ChessBoard.getInstance().setCardActivated(false);
-        }
-        else {
-            Log.i("GAMESTATE", "afterMoveend: " + ChessBoard.getInstance().getGameState());
-        }
+        Log.i("GAMESTATE", "afterMoveend: " + ChessBoard.getInstance().getGameState());
     }
 
-    private void stopMoveSoundPlayEndSound(){
+    private void stopMoveSoundPlayEndSound() {
         board = ChessBoard.getInstance();
-        if (!board.isSoundOn()){
+        if (!board.isSoundOn()) {
             return;
         }
         moveSound_start.stop();
         moveSound_start.reset();
         moveSound_end.reset();
-        moveSound_end = MediaPlayer.create(context,R.raw.chessmatemove_end);
+        moveSound_end = MediaPlayer.create(context, R.raw.chessmatemove_end);
         moveSound_end.start();
     }
 
@@ -387,7 +370,7 @@ abstract public class ChessPiece extends View {
      *
      * @param value the value
      */
-    public void setFirstMove(boolean value){
+    public void setFirstMove(boolean value) {
         this.firstMove = value;
     }
 
@@ -396,7 +379,7 @@ abstract public class ChessPiece extends View {
      *
      * @return the boolean
      */
-    public boolean getFirstMove(){
+    public boolean getFirstMove() {
         return this.firstMove;
     }
 
@@ -405,14 +388,18 @@ abstract public class ChessPiece extends View {
      *
      * @param field the field
      */
-    public void setPosition(Field field){this.currentPosition=field;}
+    public void setPosition(Field field) {
+        this.currentPosition = field;
+    }
 
     /**
      * Set protected.
      *
      * @param isProtected the is protected
      */
-    public void setProtected(boolean isProtected){this.isProtected=isProtected;}
+    public void setProtected(boolean isProtected) {
+        this.isProtected = isProtected;
+    }
 
     /**
      * Gets position.
@@ -456,15 +443,17 @@ abstract public class ChessPiece extends View {
      * @param colour the colour
      */
     public void setColor(ChessPieceColour colour) {
-        this.colour=colour;
+        this.colour = colour;
     }
 
-    public void setChampion(){
-        if (this.getPlayingPieceType()==ChessPieceType.KNIGHT)
-            isChampion=true;
+    public void setChampion() {
+        if (this.getPlayingPieceType() == ChessPieceType.KNIGHT)
+            isChampion = true;
     }
 
-    public boolean isChampion(){return this.isChampion;}
+    public boolean isChampion() {
+        return this.isChampion;
+    }
 
     /**
      * Method determines whether king is checked, by calling isChecked()-method of king. isChecked()-method is overridden in king.
@@ -472,7 +461,7 @@ abstract public class ChessPiece extends View {
      * @param boardFields current layout of fields and their pieces from chessboard
      * @return boolean whether king is in check
      */
-    public boolean isChecked(Field[][] boardFields){
+    public boolean isChecked(Field[][] boardFields) {
         ChessPiece localKing = ChessBoard.getInstance().getLocalKing();
         return localKing.isChecked(ChessBoard.getInstance().getBoardFields());
     }
@@ -483,7 +472,7 @@ abstract public class ChessPiece extends View {
      *
      * @return ArrayList of fields that can be moved to by piece (that frees king out of check), if king is in check
      */
-    public ArrayList<Field> getLegalMovesInCheck(){
+    public ArrayList<Field> getLegalMovesInCheck() {
         Field[][] currentFields = ChessBoard.getInstance().getBoardFields();
         ArrayList<Field> legalFields = this.getLegalFields();
         ChessPiece localKing = ChessBoard.getInstance().getLocalKing();
@@ -495,7 +484,7 @@ abstract public class ChessPiece extends View {
             if (!wouldbeChecked(currentFields, f)) {//checks whether king would be in check if currentpieces position were field - same for king
                 legalMovesInCheck.add(f);
             }
-            if(isChecking.contains(f)){//if piece can kill threatening piece
+            if (isChecking.contains(f)) {//if piece can kill threatening piece
                 legalMovesInCheck.add(f);
             }
         }
@@ -506,10 +495,10 @@ abstract public class ChessPiece extends View {
      * Method determines whether king would still be checked, if piece were to move to Field f. Method is overridden in king.
      *
      * @param currentFields current layout of fields and their pieces from chessboard
-     * @param f field that is theoretically moved to
+     * @param f             field that is theoretically moved to
      * @return boolean whether king would be in check if piece moved to field f
      */
-    protected boolean wouldbeChecked(Field[][] currentFields, Field f){
+    protected boolean wouldbeChecked(Field[][] currentFields, Field f) {
         ChessPiece localKing = ChessBoard.getInstance().getLocalKing();
         this.getPosition().setCurrentPiece(null);//moving away from current field so it is empty
         ChessPiece realPiece = f.getCurrentPiece();//temporary save
@@ -521,19 +510,28 @@ abstract public class ChessPiece extends View {
     }
 
 
-    public void setTargetPosition(Field position){this.targetPosition=position;}
-
-    public void setUpdateMovementOffset(boolean Boolean){this.updateMovementOffset=Boolean;}
-
-    public void resetOffset(){this.offset=new Vector(0,0);}
-
-    public Field getTargetPosition(){return this.targetPosition;}
-
-    public void setSwapPiece(ChessPiece piece){
-        isSwapped=true;
-        swapPiece=piece;
+    public void setTargetPosition(Field position) {
+        this.targetPosition = position;
     }
-    public ArrayList<Field> getIsChecking(){
+
+    public void setUpdateMovementOffset(boolean Boolean) {
+        this.updateMovementOffset = Boolean;
+    }
+
+    public void resetOffset() {
+        this.offset = new Vector(0, 0);
+    }
+
+    public Field getTargetPosition() {
+        return this.targetPosition;
+    }
+
+    public void setSwapPiece(ChessPiece piece) {
+        isSwapped = true;
+        swapPiece = piece;
+    }
+
+    public ArrayList<Field> getIsChecking() {
         return this.isChecking;
     }
 }

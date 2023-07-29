@@ -1,32 +1,24 @@
 package com.game.chessmate.GameFiles.Networking;
 
-import android.content.Intent;
+import static android.content.ContentValues.TAG;
+
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.game.chessmate.CreateSession;
-import com.game.chessmate.GameActivity;
 import com.game.chessmate.GameFiles.ChessBoard;
 import com.game.chessmate.GameFiles.Field;
 import com.game.chessmate.GameFiles.GameState;
-import com.game.chessmate.GameFiles.Networking.NetObjects.CardDataObject;
 import com.game.chessmate.GameFiles.Networking.NetObjects.FieldDataObject;
 import com.game.chessmate.GameFiles.Networking.NetObjects.GameDataObject;
 import com.game.chessmate.GameFiles.Networking.NetObjects.LobbyDataObject;
 import com.game.chessmate.GameFiles.Networking.NetObjects.startGameParameters;
 import com.game.chessmate.GameFiles.PlayingPieces.ChessPieceColour;
-import com.game.chessmate.Lobby;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import static android.content.ContentValues.TAG;
 
 /** The NetworkManager class functions as the framework for networked interaction. */
 public class NetworkManager {
@@ -101,15 +93,6 @@ public class NetworkManager {
         ChessMateClient.getInstance().getClient().sendTCP(gameDataObject);
     }
 
-    public static void receiveCard(int cardId, FieldDataObject fieldObject1, FieldDataObject fieldObject2){
-        Log.i(TAG, "receiveCard: receivecard was called");
-
-        Field field1 = ChessBoard.getInstance().getBoardFields()[fieldObject1.getX()][fieldObject1.getY()];
-        Field field2 = ChessBoard.getInstance().getBoardFields()[fieldObject2.getX()][fieldObject2.getY()];
-
-        ChessBoard.getInstance().receiveCardAction(cardId, field1, field2);
-    }
-
     public static Listener getGameCycleListener(){
         Listener gameCycleListener = new Listener(){
             public void received(Connection connection, Object object) {
@@ -127,8 +110,6 @@ public class NetworkManager {
                         NetworkManager.excludeAfterMove = false;
                         if(gameDataObject.isMovedBack()){excludeAfterMove=true;}
                         receiveMove(gameDataObject.getOrigin(), gameDataObject.getTarget());
-                    } else if (gameDataObject.isUsedCard()) {
-                        receiveCard(gameDataObject.getCardId(),gameDataObject.getOrigin(),gameDataObject.getTarget());
                     }
                 }
             }
