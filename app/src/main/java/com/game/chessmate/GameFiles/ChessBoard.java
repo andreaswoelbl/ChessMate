@@ -1,15 +1,16 @@
 package com.game.chessmate.GameFiles;
 
-import android.app.Activity;
-import android.content.Context;
+import static android.content.ContentValues.TAG;
+
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
 
 import com.game.chessmate.GameActivity;
+import com.game.chessmate.GameEndActivity;
 import com.game.chessmate.GameFiles.Networking.NetworkManager;
 import com.game.chessmate.GameFiles.PlayingPieces.Bishop;
 import com.game.chessmate.GameFiles.PlayingPieces.ChessPiece;
@@ -20,16 +21,14 @@ import com.game.chessmate.GameFiles.PlayingPieces.Knight;
 import com.game.chessmate.GameFiles.PlayingPieces.Pawn;
 import com.game.chessmate.GameFiles.PlayingPieces.Queen;
 import com.game.chessmate.GameFiles.PlayingPieces.Rook;
-import com.game.chessmate.R;
 
 import java.util.ArrayList;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * The ChessBoard class handles creation and maintenance of the ChessBoard
  */
 public class ChessBoard {
+
     // Thread-Save Singleton
     private static final class InstanceHolder {
         /**
@@ -764,6 +763,7 @@ public class ChessBoard {
         }
     }
 
+
     /**
      * Calculates the size of a Rectangle in a Field width the help of the screen size metrics width
      * A Rectangle takes integer but the division of the width width delivers float, so the offset
@@ -886,6 +886,14 @@ public class ChessBoard {
             a.setGameStateView(gameState);
         }
         this.gameState = gameState;
+    }
+
+    /**
+     * Redirect to end screen.
+     */
+    public void redirectToEndScreen(){
+        Intent intent = new Intent(view.getContext(), GameEndActivity.class);
+        view.getContext().startActivity(intent);
     }
 
     public Deck getDeck() {
