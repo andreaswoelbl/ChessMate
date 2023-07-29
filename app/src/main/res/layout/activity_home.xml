@@ -23,23 +23,16 @@
 
     <Button
         android:id="@+id/EnterGameButton"
-        android:layout_width="254dp"
-        android:layout_height="61dp"
-        android:layout_marginBottom="184dp"
-        android:shadowColor="#FFFFFF"
+        android:layout_width="250dp"
+        android:layout_height="60dp"
+        style="@style/DefaultButton"
+        android:layout_marginBottom="180dp"
         android:text="Enter"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#FFFFFF"
         android:textSize="24sp"
-        android:visibility="visible"
-        app:backgroundTint="#000000"
-        app:cornerRadius="80px"
+        app:cornerRadius="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.528"
-        app:layout_constraintStart_toStartOf="parent"
-        app:rippleColor="#FFFFFF"
-        app:strokeColor="#000000" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/pleaseEnterYourName"
@@ -48,9 +41,6 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:textAlignment="center"
-        android:textColor="#000000"
-        android:textColorHighlight="#000000"
-        android:textColorLink="#000000"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/EnterGameButton"
@@ -65,7 +55,6 @@
         android:layout_height="76dp"
         android:layout_marginTop="68dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_chessmatename" />
@@ -76,10 +65,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="112dp"
         android:text="Welcome"
-        android:textColor="#000000"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView8" />
 
@@ -90,12 +77,11 @@
         android:layout_height="56dp"
         android:layout_marginTop="28dp"
         android:hint="Name"
-        android:textColorHint="#000000"
-        app:boxStrokeColor="#000000"
+        app:boxBackgroundColor="?attr/colorSecondary"
+        app:boxStrokeColor="?attr/colorSecondary"
         app:counterMaxLength="15"
         app:endIconMode="custom"
-        app:endIconTint="#2196F3"
-        app:hintTextColor="#2196F3"
+        app:hintTextColor="?attr/colorSecondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2">
@@ -105,9 +91,8 @@
             android:inputType="text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLength="16"
-            android:textColorHighlight="#000000"
-            android:textColorLink="#000000" />
+            android:backgroundTint="?attr/colorPrimaryVariant"
+            android:maxLength="16" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

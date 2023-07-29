@@ -45,7 +45,6 @@
             android:layout_height="wrap_content"
             android:justificationMode="inter_word"
             android:text="@string/game_rules"
-            android:textColor="@color/black"
             android:textSize="17sp" />
     </ScrollView>
 
