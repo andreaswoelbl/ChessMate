@@ -9,12 +9,6 @@ public class GameDataObject {
     FieldDataObject origin;
     FieldDataObject target;
 
-
-    //Cards
-    boolean usedCard;
-    int cardId;
-    CardDataObject cardObject;
-
     //CheatFunction
     boolean cheatActivated;
     int WrongCheatRevealPlayer;
@@ -23,7 +17,8 @@ public class GameDataObject {
     private boolean win;
     private boolean loose;
 
-    public GameDataObject() {}
+    public GameDataObject() {
+    }
 
     public boolean isMovedBack() {
         return movedBack;
@@ -73,22 +68,6 @@ public class GameDataObject {
         this.moved = moved;
     }
 
-    public boolean isUsedCard() {
-        return usedCard;
-    }
-
-    public void setUsedCard(boolean usedCard) {
-        this.usedCard = usedCard;
-    }
-
-    public CardDataObject getCardObject() {
-        return cardObject;
-    }
-
-    public void setCardObject(CardDataObject cardObject) {
-        this.cardObject = cardObject;
-    }
-
     public boolean isCheatActivated() {
         return cheatActivated;
     }
@@ -97,13 +76,6 @@ public class GameDataObject {
         this.cheatActivated = cheatActivated;
     }
 
-    public int getCardId() {
-        return cardId;
-    }
-
-    public void setCardId(int cardId) {
-        this.cardId = cardId;
-    }
 
     public boolean isWin() {
         return win;
