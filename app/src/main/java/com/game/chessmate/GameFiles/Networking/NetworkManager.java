@@ -20,23 +20,31 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-/** The NetworkManager class functions as the framework for networked interaction. */
+/**
+ * The NetworkManager class functions as the framework for networked interaction.
+ */
 public class NetworkManager {
-    private static final class InstanceHolder {static final NetworkManager INSTANCE = new NetworkManager();}
-    public static NetworkManager getInstance(){ return NetworkManager.InstanceHolder.INSTANCE; }
+    private static final class InstanceHolder {
+        static final NetworkManager INSTANCE = new NetworkManager();
+    }
+
+    public static NetworkManager getInstance() {
+        return NetworkManager.InstanceHolder.INSTANCE;
+    }
+
     public static ChessPieceColour initialColor;
     public static String currentLobbyCode;
     public static boolean excludeAfterMove;
     static ExecutorService service = Executors.newFixedThreadPool(1);
 
-    public static String createSession(String name){
-            Future<String> future = service.submit(new NetworkTasks.CreateSession(name));
-        try{
+    public static String createSession(String name) {
+        Future<String> future = service.submit(new NetworkTasks.CreateSession(name));
+        try {
             String lobbycode = future.get();
-            Log.i("NETWORK","LobbyCode: "+lobbycode);
+            Log.i("NETWORK", "LobbyCode: " + lobbycode);
             NetworkManager.currentLobbyCode = lobbycode;
             return lobbycode;
-        } catch (InterruptedException | ExecutionException e){
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             //Log.e("NETWORK","Couldnt get Value from Future");
             //Thread.currentThread().interrupt();
@@ -46,13 +54,13 @@ public class NetworkManager {
 
     public static LobbyDataObject joinSession(String lobbycode, String name) {
         Future<LobbyDataObject> future = service.submit(new NetworkTasks.JoinSession(lobbycode, name));
-        try{
+        try {
             LobbyDataObject lobbyDataObject = future.get();
-            Log.i("NETWORK","LobbyCode: "+lobbyDataObject);
+            Log.i("NETWORK", "LobbyCode: " + lobbyDataObject);
             NetworkManager.currentLobbyCode = lobbycode;
             return lobbyDataObject;
-        } catch (InterruptedException | ExecutionException e){
-            Log.e("NETWORK","Couldnt get Value from Future");
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e("NETWORK", "Couldnt get Value from Future");
             //Thread.currentThread().interrupt();
         }
         return null;
@@ -60,19 +68,19 @@ public class NetworkManager {
 
     public static void startGame(String lobbycode) {
         Future<startGameParameters> future = service.submit(new NetworkTasks.startGame(lobbycode));
-        try{
+        try {
             startGameParameters parameters = future.get();
-            Log.i("COLOR","COLOR: "+parameters.getInitColour());
+            Log.i("COLOR", "COLOR: " + parameters.getInitColour());
             NetworkManager.currentLobbyCode = lobbycode;
             NetworkManager.initialColor = parameters.getInitColour();
             ChessMateClient.getInstance().getClient().addListener(getGameCycleListener());
-        } catch (InterruptedException | ExecutionException e){
-            Log.e("NETWORK","Couldnt get Value from Future");
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e("NETWORK", "Couldnt get Value from Future");
             //Thread.currentThread().interrupt();
         }
     }
 
-    public static void sendMove(Field currentField, Field targetField){
+    public static void sendMove(Field currentField, Field targetField) {
         Log.i(TAG, "sendMove: " + "sendmove was called");
 
         FieldDataObject currentFieldObject = new FieldDataObject();
@@ -93,22 +101,24 @@ public class NetworkManager {
         ChessMateClient.getInstance().getClient().sendTCP(gameDataObject);
     }
 
-    public static Listener getGameCycleListener(){
-        Listener gameCycleListener = new Listener(){
+    public static Listener getGameCycleListener() {
+        Listener gameCycleListener = new Listener() {
             public void received(Connection connection, Object object) {
-                if(object instanceof GameDataObject){
-                    GameDataObject gameDataObject = (GameDataObject)object;
+                if (object instanceof GameDataObject) {
+                    GameDataObject gameDataObject = (GameDataObject) object;
                     ChessBoard.getInstance().getLocalPlayer().setTimesCheatFunktionUsedWrongly(gameDataObject.getWrongCheatRevealPlayer());
-                        ChessBoard.getInstance().updateButtonText();
-                    if(gameDataObject.isWin()){
-                        Log.d(TAG, "received: " + gameDataObject +" "+ gameDataObject.isWin());
+                    ChessBoard.getInstance().updateButtonText();
+                    if (gameDataObject.isWin()) {
+                        Log.d(TAG, "received: " + gameDataObject + " " + gameDataObject.isWin());
                         receiveWin();
-                    } else if(gameDataObject.isLoose()){
-                        Log.d(TAG, "received: " + gameDataObject +" "+ gameDataObject.isLoose());
+                    } else if (gameDataObject.isLoose()) {
+                        Log.d(TAG, "received: " + gameDataObject + " " + gameDataObject.isLoose());
                         receiveLoose();
                     } else if (gameDataObject.isMoved()) {
                         NetworkManager.excludeAfterMove = false;
-                        if(gameDataObject.isMovedBack()){excludeAfterMove=true;}
+                        if (gameDataObject.isMovedBack()) {
+                            excludeAfterMove = true;
+                        }
                         receiveMove(gameDataObject.getOrigin(), gameDataObject.getTarget());
                     }
                 }
@@ -117,7 +127,7 @@ public class NetworkManager {
         return gameCycleListener;
     }
 
-    public static void receiveMove(FieldDataObject origin, FieldDataObject target){
+    public static void receiveMove(FieldDataObject origin, FieldDataObject target) {
         Log.i(TAG, "receiveMove: receivemove was called");
         Log.i("RECEIVE_MOVE", String.valueOf(origin));
         Log.i("RECEIVE_MOVE", String.valueOf(target));
@@ -130,16 +140,17 @@ public class NetworkManager {
         Log.i("RECEIVE_MOVE", String.valueOf(targetField));
         Log.i("RECEIVE_MOVE", String.valueOf(targetField.getFieldX()));
         Log.i("RECEIVE_MOVE", String.valueOf(targetField.getFieldY()));
-        if(originField!=null && targetField!=null ) originField.getCurrentPiece().move(targetField);
+        if (originField != null && targetField != null)
+            originField.getCurrentPiece().move(targetField);
     }
 
-    public static void receiveWin(){
+    public static void receiveWin() {
         Log.d(TAG, "receiveWin: " + "was called");
         ChessBoard.getInstance().setGameState(GameState.WIN);
         ChessBoard.getInstance().redirectToEndScreen();
     }
 
-    public static void receiveLoose(){
+    public static void receiveLoose() {
         Log.d(TAG, "receiveLoose: " + "was called");
         ChessBoard.getInstance().setGameState(GameState.LOOSE);
         ChessBoard.getInstance().redirectToEndScreen();
