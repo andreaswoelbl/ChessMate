@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     tools:context=".Lobby">
 
     <TextView
@@ -12,27 +11,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Lobby"
-        android:textColor="#000000"
         android:textSize="36sp"
         app:layout_constraintBottom_toTopOf="@+id/player1Name"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.552" />
+        app:layout_constraintVertical_bias="0.5" />
 
     <TextView
         android:id="@+id/CodeOutput"
-        android:layout_width="255dp"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="36dp"
-        android:gravity="center"
         android:text="Code: TextView"
-        android:textColor="#000000"
         android:textSize="36sp"
         app:layout_constraintBottom_toTopOf="@+id/enterGameLobbyButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -41,11 +35,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="44dp"
         android:text="Hier erscheint der NamePlayer2"
-        android:textColor="#000000"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/CodeOutput"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -55,33 +47,23 @@
         android:layout_marginBottom="52dp"
         android:shadowColor="#FF9800"
         android:text="NamePlayer1"
-        android:textColor="#000000"
         android:textColorHighlight="#FF9800"
         android:textColorHint="#FF9800"
         android:textColorLink="#FF9800"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/player2Name"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/imageView5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/enterGameLobbyButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/DefaultButton"
         android:layout_marginBottom="44dp"
         android:text="Enter Game"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        app:backgroundTint="#000000"
-        app:cornerRadius="10dp"
         app:layout_constraintBottom_toTopOf="@+id/imageView3"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:strokeColor="#000000"
-        app:strokeWidth="1dp" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <ImageView
         android:id="@+id/imageView3"
@@ -90,7 +72,6 @@
         android:layout_marginBottom="28dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_pawn2_0" />
 
