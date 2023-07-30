@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.game.chessmate.GameFiles.CheatFunktion;
 import com.game.chessmate.GameFiles.ChessBoard;
 import com.game.chessmate.GameFiles.GameState;
+import com.game.chessmate.GameFiles.Networking.NetworkTasks;
 import com.game.chessmate.GameFiles.Player;
 
 /**
@@ -45,6 +46,7 @@ public class GameActivity extends AppCompatActivity {
     private float maxValue;
 
     private Player player;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,18 +64,20 @@ public class GameActivity extends AppCompatActivity {
         } else {
             CheatFunktion.setCheatFunction(true);
         }
+
+        //Cheat-Function
         maxValue = sensor.getMaximumRange();
-        CheatFunktion cheatFunktion = new CheatFunktion(GameActivity.this);
-        //Log.d("Sensor", String.valueOf(maxValue));
         lightEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                player.setLightValue(sensorEvent.values[0]);
+                float lightValue = sensorEvent.values[0];
                 //float closeSensor = maxValue/100;
-                if (sensorEvent.values[0] <= 500 && cheatButtonStatus()) {
-                    cheatFunktion.determineCheat();
+                if (lightValue < 1) {
+                    Toast.makeText(GameActivity.this, "You tried to reveal a cheat!", Toast.LENGTH_SHORT).show();
+                    new NetworkTasks.SendSensorPacket();
                 }
             }
+
 
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -81,23 +85,34 @@ public class GameActivity extends AppCompatActivity {
             }
         };
 
-        cheatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        cheatButton.setOnClickListener(v -> {
 
-                if (cheatButton.getText().toString().matches("Cheat Off")) {
-                    cheatButton.setText("Cheat On");
-                    player.setCheatOn(true);
-                    isCheatOn = true;
-                    cheatButton.setBackgroundColor(getResources().getColor(R.color.purple_200));
-
-                } else if (cheatButton.getText().toString().matches("Cheat On")) {
-                    cheatButton.setText("Cheat Off");
+            if (isCheatOn) {
+                if (player.getTimesCheatFunktionUsedWrongly() == 0) {
                     isCheatOn = false;
+                    cheatButton.setText("No Cheats Left!");
+                    cheatButton.setTextColor(getApplication().getResources().getColor(R.color.white));
+                    cheatButton.setBackgroundColor(getResources().getColor(R.color.black));
+                } else {
+                    cheatButton.setText("Cheat OFF " + player.getTimesCheatFunktionUsedWrongly() + " left");
                     ChessBoard.getInstance().resetLegalMoves();
                     player.setCheatOn(false);
+                    isCheatOn = false;
+                    cheatButton.setTextColor(getApplication().getResources().getColor(R.color.white));
                     cheatButton.setBackgroundColor(getResources().getColor(R.color.black));
-
+                }
+            } else {
+                if (player.getTimesCheatFunktionUsedWrongly() == 0) {
+                    isCheatOn = false;
+                    cheatButton.setText("No Cheats Left!");
+                    cheatButton.setTextColor(getApplication().getResources().getColor(R.color.white));
+                    cheatButton.setBackgroundColor(getResources().getColor(R.color.black));
+                } else {
+                    cheatButton.setText("Cheat ON " + player.getTimesCheatFunktionUsedWrongly() + " left");
+                    isCheatOn = true;
+                    player.setCheatOn(true);
+                    cheatButton.setTextColor(getApplication().getResources().getColor(R.color.black));
+                    cheatButton.setBackgroundColor(getResources().getColor(R.color.white));
                 }
             }
         });
@@ -167,14 +182,16 @@ public class GameActivity extends AppCompatActivity {
         return cheatButton;
     }
 
-    public void updateButtonTextLocal(){
+    public void updateButtonTextLocal() {
         /**
          * The Cheat button.
          */
         Button cheatButton = findViewById(R.id.cheatButton);
         if (cheatButton != null) {
-            if(isCheatOn) cheatButton.setText("Cheat ON " + player.getTimesCheatFunktionUsedWrongly() + " left");
-            if(!isCheatOn) cheatButton.setText("Cheat OFF " + player.getTimesCheatFunktionUsedWrongly() + " left");
+            if (isCheatOn)
+                cheatButton.setText("Cheat ON " + player.getTimesCheatFunktionUsedWrongly() + " left");
+            if (!isCheatOn)
+                cheatButton.setText("Cheat OFF " + player.getTimesCheatFunktionUsedWrongly() + " left");
         }
     }
 
